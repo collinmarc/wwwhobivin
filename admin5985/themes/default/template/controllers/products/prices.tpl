@@ -264,9 +264,10 @@ $(document).ready(function () {
 		</div>
 	</div>
 	<div class="panel-footer">
+		<!-- Footer -->
 		<a href="{$link->getAdminLink('AdminProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
-		<button type="submit" name="submitAddproduct" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save'}</button>
-		<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save and stay'}</button>
+		<button type="submit" name="submitAddproduct" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save'}</button>
+		<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save and stay'}</button>
 	</div>
 </div>
 {if isset($specificPriceModificationForm)}
@@ -292,6 +293,7 @@ $(document).ready(function () {
 		{/foreach}
 	</script>
 	<div id="add_specific_price" class="well clearfix" style="display: none;">
+
 		<div class="col-lg-12">
 			<div class="form-group">
 				<label class="control-label col-lg-2" for="{if !$multi_shop}spm_currency_0{else}sp_id_shop{/if}">{l s='For'}</label>
@@ -405,33 +407,11 @@ $(document).ready(function () {
 						<div class="col-lg-4">
 							<div class="input-group">
 								<span class="input-group-addon">{$currency->prefix}{$currency->suffix}</span>
-                                <script>
-                                    
-                                $('#dropdown_test').change(function () {
-    var select1_control = 150;
-    var str = select1_control * $(this).find('option:selected').data('one');
-    $('#sp_price').val(str);
-});
-                                </script>
-                    <input type="text" id="sp_price" name="sp_price" />
-<select id="dropdown_test" onchange="calc()">
-    <option value="N" data-one="1.28" data-two="">CHR : (prix de base / 0.8)+0.35</option>
-    <option value="G" data-one="1.25" data-two="">EF : prix de base / 0.8</option>
-    <option value="O" data-one="1.723" data-two="">PART : (prix de base + 0.45) / 0.60</option>
-    <option value="A" data-one="1.37" data-two="">CHR : (prix de base + 0.35) / 0.75</option>
-    <option value="R" data-one="1.17" data-two="">EF : prix de base / 0.85</option>
-    <option value="U" data-one="1.6" data-two="">PART : (prix de base + 0.48) / 0.65</option>
-
-</select>            
-                                
-                                
-								
-                                
-                                
+								<input type="text" disabled="disabled" name="sp_price" id="sp_price" value="{$product->price|string_format:$priceDisplayPrecisionFormat}" />
 							</div>
 							<p class="checkbox">
 								<label for="leave_bprice">{l s='Leave base price:'}</label>
-								<input type="checkbox" id="leave_bprice" name="leave_bprice"  value="" checked=""  />
+								<input type="checkbox" id="leave_bprice" name="leave_bprice"  value="1" checked="checked"  />
 							</p>
 						</div>
 					</div>
@@ -461,6 +441,7 @@ $(document).ready(function () {
 			</div>
 		</div>
 	</div>
+	<!-- Fin de add specific_price -->
 	<script type="text/javascript">
 		var currencyName = '{$currency->name|escape:'html':'UTF-8'|@addcslashes:'\''}';
 		$(document).ready(function(){

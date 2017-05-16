@@ -33,11 +33,6 @@ function ProductTabsManager(){
 	this.page_reloading = false;
 	this.has_error_loading_tabs = false;
 
-	/**
-	* Show / Hide languages semaphore
-	*/
-	this.allow_hide_other_languages = true;
-
 	this.setTabs = function(tabs){
 		this.product_tabs = tabs;
 	}
@@ -92,9 +87,8 @@ function ProductTabsManager(){
 	 */
 	this.display = function (tab_name, selected)
 	{
-		/*In order to prevent mod_evasive DOSPageInterval (Default 1s)*/
-		if (mod_evasive)
-			sleep(1000);
+		if (mod_evasive || mod_security)
+			sleep(1);
 
 		var tab_selector = $("#product-tab-content-" + tab_name);
 
@@ -119,13 +113,12 @@ function ProductTabsManager(){
 			}
 
 			return $.ajax({
-				url : $('#link-' + tab_name).attr('href') + '&ajax=1' + '&page=' + parseInt($('#page').val()) + '&rand=' + + new Date().getTime(),
+				url : $('#link-'+tab_name).attr("href")+"&ajax=1" + '&rand=' + new Date().getTime(),
 				async : true,
 				cache: false, // cache needs to be set to false or IE will cache the page with outdated product values
 				type: send_type,
 				headers: { "cache-control": "no-cache" },
 				data: data,
-				timeout: 30000,
 				success : function(data)
 				{
 					tab_selector.html(data).find('.dropdown-toggle').dropdown();
@@ -163,63 +156,39 @@ function ProductTabsManager(){
 	 * @param array stack contains tab names as strings
 	 */
 	this.displayBulk = function(stack){
-		if (stack.length == 0)
-		{
+		
 			$('[name="submitAddproductAndStay"]').each(function() {
 				$(this).prop('disabled', false).find('i').removeClass('process-icon-loading').addClass('process-icon-save');
 			});
 			$('[name="submitAddproduct"]').each(function() {
 				$(this).prop('disabled', false).find('i').removeClass('process-icon-loading').addClass('process-icon-save');
 			});
-			this.allow_hide_other_languages = true;
-
-			return false;
-		}
-
-		this.current_request = 	this.display(stack[0], false);
+		this.current_request = this.display(stack[0], false);
 
 		if (this.current_request !== undefined)
 		{
 			this.current_request.complete(function(request, status) {
-				var wrong_status_code = new Array(400, 401, 403, 404, 405, 406, 408, 410, 413, 429, 499, 500, 502, 503, 504);
-
-				if ((status === 'abort' || status === 'error' || request.responseText.length == 0 || in_array(request.status, wrong_status_code) || self.stack_error.length !== 0) && !self.page_reloading)
-				{
-					var current_tab = stack[0];
+				if (status === 'abort' || status === 'error')
 					self.stack_error.push(stack.shift());
-					self.has_error_loading_tabs = true;
-
-					jConfirm('Tab : ' + current_tab + ' (' + request.status + ')\n' + reload_tab_description, reload_tab_title, function(confirm) {
-						if (confirm === true)
-						{
-							self.page_reloading = true;
-							self.displayBulk(stack);
-						}
-						else
-						{
-							$('[name="submitAddproductAndStay"]').each(function() {
-								$(this).prop('disabled', false).find('i').removeClass('process-icon-loading').addClass('process-icon-save');
-							});
-							$('[name="submitAddproduct"]').each(function() {
-								$(this).prop('disabled', false).find('i').removeClass('process-icon-loading').addClass('process-icon-save');
-							});
-							self.allow_hide_other_languages = true;
-
-							return false;
-						}
-					});
-				}
-				else if (stack.length !== 0 && status !== 'abort')
+				else
+					stack.shift()
+				if (stack.length !== 0 && status !== 'abort')
 				{
-					stack.shift();
 					self.displayBulk(stack);
 				}
+				else if (self.stack_error.length !== 0 && !self.page_reloading)
+				{
+					jConfirm(reload_tab_description, reload_tab_title, function(confirm) {
+						if (confirm === true)
+						{
+							self.displayBulk(self.stack_error.slice(0));
+							self.stack_error = [];
+						}
+						else
+							return false;
+					});
+				}
 			});
-		}
-		else
-		{
-			stack.shift();
-			self.displayBulk(stack);
 		}
 	}
 }
@@ -246,12 +215,6 @@ function loadPack() {
 // The ProductTabsManager instance will make sure the onReady() methods of each tabs are executed once the tab has loaded
 var product_tabs = [];
 
-product_tabs['Customization'] = new function(){
-	this.onReady = function(){
-		if (display_multishop_checkboxes)
-		ProductMultishop.checkAllCustomization();
-	}
-}
 product_tabs['Combinations'] = new function(){
 	var self = this;
 	this.bindEdit = function(){
@@ -750,6 +713,7 @@ product_tabs['Prices'] = new function(){
 				data: {
 					ajax: true
 				},
+				context: document.body,
 				dataType: 'json',
 				context: this,
 				async: false,
@@ -1230,7 +1194,7 @@ product_tabs['Pack'] = new function() {
 	this.bindPackEvents = function () {
 
 		$('.delPackItem').on('click', function() {
-			delPackItem($(this).data('delete'), $(this).data('delete-attr'));
+			delPackItem($(this).data('delete'));
 		});
 
 		function productFormatResult(item) {
@@ -1269,13 +1233,9 @@ product_tabs['Pack'] = new function() {
 					var returnIds = new Array();
 					if (data) {
 						for (var i = data.length - 1; i >= 0; i--) {
-							var is_in = 0;
-							for (var j = 0; j < excludeIds.length; j ++) {
-								if (data[i].id == excludeIds[j][0] && (typeof data[i].id_product_attribute == 'undefined' || data[i].id_product_attribute == excludeIds[j][1]))
-									is_in = 1;
-							}
-							if (!is_in)
+							if ($.inArray(data[i].id, excludeIds) <= -1) {
 								returnIds.push(data[i]);
+							}
 						}
 						return {
 							results: returnIds
@@ -1307,23 +1267,19 @@ product_tabs['Pack'] = new function() {
 					error_modal(error_heading_msg, msg_set_quantity);
 					return false;
 				}
-
-				if (typeof selectedProduct.id_product_attribute === 'undefined')
-					selectedProduct.id_product_attribute = 0;
-
 				var divContent = $('#divPackItems').html();
-				divContent += '<li class="product-pack-item media-product-pack" data-product-name="' + selectedProduct.name + '" data-product-qty="' + selectedProduct.qty + '" data-product-id="' + selectedProduct.id + '" data-product-id-attribute="' + selectedProduct.id_product_attribute + '">';
+				divContent += '<li class="product-pack-item media-product-pack" data-product-name="' + selectedProduct.name + '" data-product-qty="' + selectedProduct.qty + '" data-product-id="' + selectedProduct.id + '">';
 				divContent += '<img class="media-product-pack-img" src="' + selectedProduct.image +'"/>';
 				divContent += '<span class="media-product-pack-title">' + selectedProduct.name + '</span>';
 				divContent += '<span class="media-product-pack-ref">REF: ' + selectedProduct.ref + '</span>';
 				divContent += '<span class="media-product-pack-quantity"><span class="text-muted">x</span> ' + selectedProduct.qty + '</span>';
-				divContent += '<button type="button" class="btn btn-default delPackItem media-product-pack-action" data-delete="' + selectedProduct.id + '" data-delete-attr="' + selectedProduct.id_product_attribute + '"><i class="icon-trash"></i></button>';
+				divContent += '<button type="button" class="btn btn-default delPackItem media-product-pack-action" data-delete="' + selectedProduct.id + '" ><i class="icon-trash"></i></button>';
 				divContent += '</li>';
 
 				// QTYxID-QTYxID
 				// @todo : it should be better to create input for each items and each qty
 				// instead of only one separated by x, - and ¤
-				var line = selectedProduct.qty + 'x' + selectedProduct.id + 'x' + selectedProduct.id_product_attribute;
+				var line = selectedProduct.qty + 'x' + selectedProduct.id ;
 				var lineDisplay = selectedProduct.qty + 'x ' + selectedProduct.name;
 
 				$('#divPackItems').html(divContent);
@@ -1333,7 +1289,7 @@ product_tabs['Pack'] = new function() {
 				$('.delPackItem').on('click', function(e){
 					e.preventDefault();
 					e.stopPropagation();
-					delPackItem($(this).data('delete'), $(this).data('delete-attr'));
+					delPackItem($(this).data('delete'));
 				})
 				selectedProduct = null;
 				$('#curPackItemName').select2("val", "");
@@ -1344,7 +1300,7 @@ product_tabs['Pack'] = new function() {
 			}
 		}
 
-		function delPackItem(id, id_attribute) {
+		function delPackItem(id) {
 
 			var reg = new RegExp('-', 'g');
 			var regx = new RegExp('x', 'g');
@@ -1357,16 +1313,17 @@ product_tabs['Pack'] = new function() {
 
 			input.val(null);
 			name.val(null);
+
 			for (var i = 0; i < inputCut.length; ++i)
 				if (inputCut[i]) {
 					var inputQty = inputCut[i].split(regx);
-					if (inputQty[1] != id || inputQty[2] != id_attribute) {
+					if (inputQty[1] != id) {
 						input.val( input.val() + inputCut[i] + '-' );
 						name.val( name.val() + nameCut[i] + '¤');
 					}
 				}
 
-			var elem = $('.product-pack-item[data-product-id="' + id + '"][data-product-id-attribute="' + id_attribute + '"]');
+			var elem = $('.product-pack-item[data-product-id = "' + id + '"]');
 			elem.remove();
 
 			if ($('.product-pack-item').length === 0){
@@ -1376,28 +1333,20 @@ product_tabs['Pack'] = new function() {
 
 		function getSelectedIds()
 		{
-			var reg = new RegExp('-', 'g');
-			var regx = new RegExp('x', 'g');
-
-			var input = $('#inputPackItems');
-
-			if (input.val() === undefined)
+			if ($('#inputPackItems').val() === undefined)
 				return '';
+			var ids = '';
+			if (typeof(id_product) != 'undefined')
+				ids += id_product + ',';
 
-			var inputCut = input.val().split(reg);
+			ids += $('#inputPackItems').val().replace(/\d*x/g, '').replace(/\-/g,',');
+			ids = ids.replace(/\,$/,'');
+			ids = ids.split(',');
+			ints = new Array();
 
-			var ints = new Array();
-
-			for (var i = 0; i < inputCut.length; ++i)
-			{
-				var in_ints = new Array();
-				if (inputCut[i]) {
-					var inputQty = inputCut[i].split(regx);
-					in_ints[0] = inputQty[1];
-					in_ints[1] = inputQty[2];
-				}
-				ints[i] = in_ints;
-			}
+			for (var i=0; i < ids.length; i++) {
+		        ints[i] = parseInt(ids[i]);
+		    }
 
 			return ints;
 		}
@@ -1525,12 +1474,6 @@ product_tabs['Quantities'] = new function(){
 		});
 		if (display_multishop_checkboxes)
 			ProductMultishop.checkAllQuantities();
-
-		$('.pack_stock_type').click(function(e)
-		{
-			self.refreshQtyAvailabilityForm();
-			self.ajaxCall({actionQty: 'pack_stock_type', value: $(this).val()});
-		});
 
 		self.refreshQtyAvailabilityForm();
 	};
@@ -1767,27 +1710,33 @@ var ProductMultishop = new function()
 						tinyMCE.get(id).show();
 				}
 				break;
+
 			case 'radio' :
 				$('input[name=\''+id+'\']').attr('disabled', checked);
 				break;
+
 			case 'show_price' :
 				if ($('input[name=\'available_for_order\']').prop('checked'))
 					checked = true;
 				$('input[name=\''+id+'\']').attr('disabled', checked);
 				break;
+
 			case 'price' :
 				$('#priceTE').attr('disabled', checked);
 				$('#priceTI').attr('disabled', checked);
 				break;
+
 			case 'unit_price' :
 				$('#unit_price').attr('disabled', checked);
 				$('#unity').attr('disabled', checked);
 				break;
+
 			case 'attribute_price_impact' :
 				$('#attribute_price_impact').attr('disabled', checked);
 				$('#attribute_price').attr('disabled', checked);
 				$('#attribute_priceTI').attr('disabled', checked);
 				break;
+
 			case 'category_box' :
 				$('#'+id+' input[type=checkbox]').attr('disabled', checked);
 				if (!checked) {
@@ -1798,26 +1747,21 @@ var ProductMultishop = new function()
 					$('#uncheck-all-'+id).attr('disabled', 'disabled');
 				}
 				break;
+
 			case 'attribute_weight_impact' :
 				$('#attribute_weight_impact').attr('disabled', checked);
 				$('#attribute_weight').attr('disabled', checked);
 				break;
+
 			case 'attribute_unit_impact' :
 				$('#attribute_unit_impact').attr('disabled', checked);
 				$('#attribute_unity').attr('disabled', checked);
 				break;
+
 			case 'seo_friendly_url':
 				$('#'+id).attr('disabled', checked);
 				$('#generate-friendly-url').attr('disabled', checked);
-				break;
-			case 'uploadable_files':
-				$('input[name^=label_0_]').attr('disabled', checked);
-				$('#'+id).attr('disabled', checked);
-				break;
-			case 'text_fields':
-				$('input[name^=label_1_]').attr('disabled', checked);
-				$('#'+id).attr('disabled', checked);
-				break;
+
 			default :
 				$('#'+id).attr('disabled', checked);
 				break;
@@ -1876,12 +1820,6 @@ var ProductMultishop = new function()
 	{
 		ProductMultishop.checkField($('input[name=\'multishop_check[id_category_default]\']').prop('checked'), 'id_category_default');
 		ProductMultishop.checkField($('input[name=\'multishop_check[id_category_default]\']').prop('checked'), 'associated-categories-tree', 'category_box');
-	};
-
-	this.checkAllCustomization = function()
-	{
-		ProductMultishop.checkField($('input[name=\'multishop_check[uploadable_files]\']').prop('checked'), 'uploadable_files', 'uploadable_files');
-		ProductMultishop.checkField($('input[name=\'multishop_check[text_fields]\']').prop('checked'), 'text_fields', 'text_fields');
 	};
 
 	this.checkAllCombinations = function()

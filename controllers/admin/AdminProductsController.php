@@ -104,6 +104,19 @@ class AdminProductsControllerCore extends AdminController
             'Warehouses' => $this->l('Warehouses'),
         );
 
+        $this->available_tabs = array('Quantities' => 3);
+        if ($this->context->shop->getContext() != Shop::CONTEXT_GROUP) {
+            $this->available_tabs = array_merge($this->available_tabs, array(
+                'Informations' => 0,
+                'Prices' => 1,
+                'Features' => 2,
+                'Associations' => 4,
+                'Images' => 5,
+                'Attachments' => 6,
+                'Seo' => 7,
+            ));
+        }
+		/*
         $this->available_tabs = array('Quantities' => 6, 'Warehouses' => 14);
         if ($this->context->shop->getContext() != Shop::CONTEXT_GROUP) {
             $this->available_tabs = array_merge($this->available_tabs, array(
@@ -122,7 +135,7 @@ class AdminProductsControllerCore extends AdminController
                 'Suppliers' => 13,
             ));
         }
-
+		*/
         // Sort the tabs that need to be preloaded by their priority number
         asort($this->available_tabs, SORT_NUMERIC);
 
@@ -2513,6 +2526,7 @@ class AdminProductsControllerCore extends AdminController
         }
         // @todo module free
         $this->tpl_form_vars['vat_number'] = file_exists(_PS_MODULE_DIR_.'vatnumber/ajax.php');
+        $this->tpl_form_vars['specificPriceModificationForm'] = true;
 
         parent::initContent();
     }
@@ -3680,8 +3694,8 @@ class AdminProductsControllerCore extends AdminController
 			</div>
 			<div class="panel-footer">
 				<a href="'.$this->context->link->getAdminLink('AdminProducts').($page > 1 ? '&submitFilter'.$this->table.'='.(int)$page : '').'" class="btn btn-default"><i class="process-icon-cancel"></i> '.$this->l('Cancel').'</a>
-				<button id="product_form_submit_btn"  type="submit" name="submitAddproduct" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> '.$this->l('Save') .'</button>
-				<button id="product_form_submit_btn"  type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> '.$this->l('Save and stay') .'</button>
+				<button id="product_form_submit_btn"  type="submit" name="submitAddproduct" class="btn btn-default pull-right" ><i class="process-icon-save"></i> '.$this->l('Save') .'</button>
+				<button id="product_form_submit_btn"  type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" ><i class="process-icon-save"></i> '.$this->l('Save and stay') .'</button>
 			</div>
 		</div>';
 
@@ -3758,8 +3772,8 @@ class AdminProductsControllerCore extends AdminController
 		</div>
 		<div class="panel-footer">
 				<a href="'.$this->context->link->getAdminLink('AdminProducts').($page > 1 ? '&submitFilter'.$this->table.'='.(int)$page : '').'" class="btn btn-default"><i class="process-icon-cancel"></i> '.$this->l('Cancel').'</a>
-				<button id="product_form_submit_btn"  type="submit" name="submitAddproduct" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> '.$this->l('Save') .'</button>
-				<button id="product_form_submit_btn"  type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> '.$this->l('Save and stay') .'</button>
+				<button id="product_form_submit_btn"  type="submit" name="submitAddproduct" class="btn btn-default pull-right" ><i class="process-icon-save"></i> '.$this->l('Save') .'</button>
+				<button id="product_form_submit_btn"  type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" ><i class="process-icon-save"></i> '.$this->l('Save and stay') .'</button>
 			</div>
 		</div>
 		';

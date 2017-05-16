@@ -92,6 +92,90 @@
 						});
 				});
 		{/if}
+		
+		var Customer = new Object();
+var product_url = '{$link->getAdminLink('AdminProducts', true)|addslashes}';
+var ecotax_tax_excl = parseFloat({$ecotax_tax_excl});
+var priceDisplayPrecision = {$smarty.const._PS_PRICE_DISPLAY_PRECISION_|intval};
+
+$(document).ready(function () {
+	Customer = {
+		"hiddenField": jQuery('#id_customer'),
+		"field": jQuery('#customer'),
+		"container": jQuery('#customers'),
+		"loader": jQuery('#customerLoader'),
+		"init": function() {
+			jQuery(Customer.field).typeWatch({
+				"captureLength": 1,
+				"highlight": true,
+				"wait": 50,
+				"callback": Customer.search
+			}).focus(Customer.placeholderIn).blur(Customer.placeholderOut);
+		},
+		"placeholderIn": function() {
+			if (this.value == '{l s='All customers'}') {
+				this.value = '';
+			}
+		},
+		"placeholderOut": function() {
+			if (this.value == '') {
+				this.value = '{l s='All customers'}';
+			}
+		},
+		"search": function()
+		{
+			Customer.showLoader();
+			jQuery.ajax({
+				"type": "POST",
+				"url": "{$link->getAdminLink('AdminCustomers')|addslashes}",
+				"async": true,
+				"dataType": "json",
+				"data": {
+					"ajax": "1",
+					"token": "{getAdminToken tab='AdminCustomers'}",
+					"tab": "AdminCustomers",
+					"action": "searchCustomers",
+					"customer_search": Customer.field.val()
+				},
+				"success": Customer.success
+			});
+		},
+		"success": function(result)
+		{
+			if(result.found) {
+				var html = '<ul class="list-unstyled">';
+				jQuery.each(result.customers, function() {
+					html += '<li><a class="fancybox" href="{$link->getAdminLink('AdminCustomers')}&id_customer='+this.id_customer+'&viewcustomer&liteDisplaying=1">'+this.firstname+' '+this.lastname+'</a>'+(this.birthday ? ' - '+this.birthday:'');
+					html += ' - '+this.email;
+					html += '<a onclick="Customer.select('+this.id_customer+', \''+this.firstname+' '+this.lastname+'\'); return false;" href="#" class="btn btn-default">{l s='Choose'}</a></li>';
+				});
+				html += '</ul>';
+			}
+			else
+				html = '<div class="alert alert-warning">{l s='No customers found'}</div>';
+			Customer.hideLoader();
+			Customer.container.html(html);
+			jQuery('.fancybox', Customer.container).fancybox();
+		},
+		"select": function(id_customer, fullname)
+		{
+			Customer.hiddenField.val(id_customer);
+			Customer.field.val(fullname);
+			Customer.container.empty();
+			return false;
+		},
+		"showLoader": function() {
+			Customer.loader.fadeIn();
+		},
+		"hideLoader": function() {
+			Customer.loader.fadeOut();
+		}
+	};
+	Customer.init();
+});
+
+
+
 	</script>
 
 	{if isset($display_common_field) && $display_common_field}
@@ -107,9 +191,10 @@
 		<div class="col-lg-9">
 			<div class="radio">
 				<label for="simple_product">
-					<input type="radio" name="type_product" id="simple_product" value="{Product::PTYPE_SIMPLE}" {if $product_type == Product::PTYPE_SIMPLE}checked="checked"{/if} >
+					<input type="radio" name="type_product" id="simple_product" value="{Product::PTYPE_SIMPLE}" checked="checked" >
 					{l s='Standard product'}</label>
 			</div>
+			<!--
 			<div class="radio">
 				<label for="pack_product">
 					<input type="radio" name="type_product" {if $is_in_pack}disabled="disabled"{/if} id="pack_product" value="{Product::PTYPE_PACK}" {if $product_type == Product::PTYPE_PACK}checked="checked"{/if} > {l s='Pack of existing products'}</label>
@@ -123,6 +208,7 @@
 				<div id="warn_virtual_combinations" class="alert alert-warning" style="display:none">{l s='You cannot use combinations with a virtual product.'}</div>
 				<div id="warn_pack_combinations" class="alert alert-warning" style="display:none">{l s='You cannot use combinations with a pack.'}</div>
 			</div>
+			-->
 		</div>
 	</div>
 
@@ -130,6 +216,19 @@
 
 	<hr />
 
+	<!-- Reference -->
+	<div class="form-group">
+		<label class="control-label col-lg-3" for="reference">
+			<span class="label-tooltip" data-toggle="tooltip"
+			title="{l s='Your internal reference code for this product.'} {l s='Allowed special characters:'} .-_#\">
+				{$bullet_common_field} {l s='Reference code'}
+			</span>
+		</label>
+		<div class="col-lg-5">
+			<input type="text" id="reference" name="reference" value="{$product->reference|htmlentitiesUTF8}" />
+		</div>
+	</div>
+	<!-- Nom -->
 	<div class="form-group">
 		<div class="col-lg-1"><span class="pull-right">{include file="controllers/products/multishop/checkbox.tpl" field="name" type="default" multilang="true"}</span></div>
 		<label class="control-label col-lg-2 required" for="name_{$id_lang}">
@@ -148,18 +247,7 @@
 		</div>
 	</div>
 
-	<div class="form-group">
-		<label class="control-label col-lg-3" for="reference">
-			<span class="label-tooltip" data-toggle="tooltip"
-			title="{l s='Your internal reference code for this product.'} {l s='Allowed special characters:'} .-_#\">
-				{$bullet_common_field} {l s='Reference code'}
-			</span>
-		</label>
-		<div class="col-lg-5">
-			<input type="text" id="reference" name="reference" value="{$product->reference|htmlentitiesUTF8}" />
-		</div>
-	</div>
-
+	<!-- 
 	<div class="form-group">
 		<label class="control-label col-lg-3" for="ean13">
 			<span class="label-tooltip" data-toggle="tooltip"
@@ -171,6 +259,7 @@
 			<input maxlength="13" type="text" id="ean13" name="ean13" value="{$product->ean13|htmlentitiesUTF8}" />
 		</div>
 	</div>
+	-->
 
 	<div class="form-group">
 		<label class="control-label col-lg-3" for="upc">
@@ -260,6 +349,7 @@
 		</script>
 	</div>
 
+	<!--
 	<div class="form-group">
 		<div class="col-lg-1"><span class="pull-right">{include file="controllers/products/multishop/checkbox.tpl" field="visibility" type="default"}</span></div>
 		<label class="control-label col-lg-2" for="visibility">
@@ -274,9 +364,10 @@
 			</select>
 		</div>
 	</div>
-
+	-->
 	<div id="product_options" class="form-group">
 		<div class="col-lg-12">
+	<!--
 			<div class="form-group">
 				<div class="col-lg-1">
 					<span class="pull-right">
@@ -321,6 +412,8 @@
 					</select>
 				</div>
 			</div>
+			-->
+
 		</div>
 	</div>
 	<hr/>
@@ -423,6 +516,8 @@
 	</div>
 	{/if}
 
+	
+	<!-- Mots Clés -->
 	<div class="form-group">
 		<label class="control-label col-lg-3" for="tags_{$id_lang}">
 			<span class="label-tooltip" data-toggle="tooltip"
@@ -478,13 +573,100 @@
 			</div>
 		</div>
 	</div>
+	<!-- Pied de page -->
 	<div class="panel-footer">
 		<a href="{$link->getAdminLink('AdminProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
-		<button type="submit" name="submitAddproduct" class="btn btn-default pull-right" ><i class="process-icon-save"></i> {l s='Save'}</button>
-		<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" ><i class="process-icon-Save"></i> {l s='Save and stay'}</button>
+		<button type="submit" name="submitAddproduct" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save'}</button>
+		<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save and stay'}</button>
 	</div>
 </div>
 <script type="text/javascript">
 	hideOtherLanguage({$default_form_language});
 	var missing_product_name = '{l s='Please fill product name input field' js=1}';
 </script>
+
+<script type="text/javascript">
+var Customer = new Object();
+var product_url = '{$link->getAdminLink('AdminProducts', true)|addslashes}';
+var ecotax_tax_excl = parseFloat({$ecotax_tax_excl});
+var priceDisplayPrecision = {$smarty.const._PS_PRICE_DISPLAY_PRECISION_|intval};
+
+$(document).ready(function () {
+	Customer = {
+		"hiddenField": jQuery('#id_customer'),
+		"field": jQuery('#customer'),
+		"container": jQuery('#customers'),
+		"loader": jQuery('#customerLoader'),
+		"init": function() {
+			jQuery(Customer.field).typeWatch({
+				"captureLength": 1,
+				"highlight": true,
+				"wait": 50,
+				"callback": Customer.search
+			}).focus(Customer.placeholderIn).blur(Customer.placeholderOut);
+		},
+		"placeholderIn": function() {
+			if (this.value == '{l s='All customers'}') {
+				this.value = '';
+			}
+		},
+		"placeholderOut": function() {
+			if (this.value == '') {
+				this.value = '{l s='All customers'}';
+			}
+		},
+		"search": function()
+		{
+			Customer.showLoader();
+			jQuery.ajax({
+				"type": "POST",
+				"url": "{$link->getAdminLink('AdminCustomers')|addslashes}",
+				"async": true,
+				"dataType": "json",
+				"data": {
+					"ajax": "1",
+					"token": "{getAdminToken tab='AdminCustomers'}",
+					"tab": "AdminCustomers",
+					"action": "searchCustomers",
+					"customer_search": Customer.field.val()
+				},
+				"success": Customer.success
+			});
+		},
+		"success": function(result)
+		{
+			if(result.found) {
+				var html = '<ul class="list-unstyled">';
+				jQuery.each(result.customers, function() {
+					html += '<li><a class="fancybox" href="{$link->getAdminLink('AdminCustomers')}&id_customer='+this.id_customer+'&viewcustomer&liteDisplaying=1">'+this.firstname+' '+this.lastname+'</a>'+(this.birthday ? ' - '+this.birthday:'');
+					html += ' - '+this.email;
+					html += '<a onclick="Customer.select('+this.id_customer+', \''+this.firstname+' '+this.lastname+'\'); return false;" href="#" class="btn btn-default">{l s='Choose'}</a></li>';
+				});
+				html += '</ul>';
+			}
+			else
+				html = '<div class="alert alert-warning">{l s='No customers found'}</div>';
+			Customer.hideLoader();
+			Customer.container.html(html);
+			jQuery('.fancybox', Customer.container).fancybox();
+		},
+		"select": function(id_customer, fullname)
+		{
+			Customer.hiddenField.val(id_customer);
+			Customer.field.val(fullname);
+			Customer.container.empty();
+			return false;
+		},
+		"showLoader": function() {
+			Customer.loader.fadeIn();
+		},
+		"hideLoader": function() {
+			Customer.loader.fadeOut();
+		}
+	};
+	Customer.init();
+});
+</script>
+
+
+	{include file="controllers/products/prices.tpl" product_tab="Informations"}
