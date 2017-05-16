@@ -1,0 +1,58 @@
+#account-creation_form {
+}
+
+#account-creation_form #submitAccount {
+	position: relative;
+	display: inline-block;
+	padding: 5px 7px;
+	border: 1px solid #cc9900;
+	-moz-border-radius: 3px !important;
+	-webkit-border-radius: 3px !important;
+	border-radius: 3px !important;
+	font-weight: bold;
+	color: #000;
+	background: #f4b61b;
+	cursor: pointer;
+	width: 100px;
+	float: right;
+}
+
+#account-creation_form .belvg_customerattributes .attach {
+	margin-top: 11px;
+}
+
+#account-creation_form .belvg_customerattributes .attach.img {
+	max-height: 100px;
+	border: silver 1px solid;
+}
+
+#account-creation_form .belvg_customerattributes .attach.link {
+	font-weight: bold;
+	font-size: 13px;
+	line-height: 30px;
+}
+
+.additional-info-container .panel-heading {
+		margin: -20px 5px 0px -16px !important;
+}
+
+@media(min-width: 768px) {
+	.additional-info-container form {
+		width: 60%;
+	}
+}
+
+
+.admin-order-section-block {
+	margin-bottom: 20px;
+}
+    .admin-order-section-block h4 {
+
+		text-transform: uppercase;
+
+}
+
+.admin-order-section p{
+
+ margin-bottom:3px;
+}

@@ -1,0 +1,35 @@
+
+
+@media(min-width: 768px) {
+	#module-belvg_customerattributes-myaccount #center_column {
+		width: 758px;
+	}
+}
+
+#module-belvg_customerattributes-myaccount #submitAccount {
+	width: 100px;
+}
+
+#module-belvg_customerattributes-myaccount .belvg_customerattributes .attach {
+	/*margin-left: 263px;*/
+	margin-bottom: 11px;
+}
+
+#module-belvg_customerattributes-myaccount .belvg_customerattributes .attach.img {
+	max-height: 100px;
+	border: silver 1px solid;
+}
+
+#module-belvg_customerattributes-myaccount .belvg_customerattributes .attach.link {
+	font-weight: bold;
+	font-size: 13px;
+	line-height: 30px;
+}
+
+#module-belvg_customerattributes-myaccount .belvg_customerattributes label.label-title {
+	vertical-align: top !important;
+}
+
+#authentication .belvg_customerattributes label.label-title {
+	vertical-align: top !important;
+}

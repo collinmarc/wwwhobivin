@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>shoppinglist</name>
+	<displayName><![CDATA[Liste de course]]></displayName>
+	<version><![CDATA[1.0]]></version>
+	<description><![CDATA[Permet &agrave; un client d&#039;ajouter/modifier des listes de course et de leur ajouter des produits]]></description>
+	<author><![CDATA[Olivier Michaud]]></author>
+	<tab><![CDATA[others]]></tab>
+	<confirmUninstall><![CDATA[Voulez-vous vraiment supprimer le module &quot;Liste de course&quot;]]></confirmUninstall>
+	<is_configurable>0</is_configurable>
+	<need_instance>0</need_instance>
+	<limited_countries></limited_countries>
+</module>
