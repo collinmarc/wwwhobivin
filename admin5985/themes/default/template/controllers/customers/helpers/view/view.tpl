@@ -356,7 +356,10 @@
 			{/if}
 		</div>
 		{*right*}
+
 		<div class="col-lg-6">
+		{* display hook specified to this page : AdminCustomers *}
+		{hook h="displayAdminCustomers" id_customer=$customer->id|intval}
 			<div class="panel">
 				<div class="panel-heading">
 					<i class="icon-eye-close"></i> {l s='Add a private note'}
@@ -379,7 +382,8 @@
 					<span id="note_feedback"></span>
 				</form>
 			</div>
-			<div class="panel">
+
+		<div class="panel">
 				<div class="panel-heading">
 					<i class="icon-envelope"></i> {l s='Messages'} <span class="badge">{count($messages)}</span>
 				</div>
@@ -584,8 +588,6 @@
 	</div>
 
 	<div class="row">
-		{* display hook specified to this page : AdminCustomers *}
-		{hook h="displayAdminCustomers" id_customer=$customer->id|intval}
 		<div class="col-lg-12">
 			<div class="panel">
 				<div class="panel-heading">

@@ -294,7 +294,7 @@
 					<input type="hidden" name="add" value="1" />
 					<input type="hidden" name="id_product_attribute" id="idCombination" value="" />
 				</p>
-				<div class="box-info-product" display:none >
+				<div class="box-info-product"  >
 					<div class="content_prices clearfix">
 						{if $product->show_price && !isset($restricted_country_mode) && !$PS_CATALOG_MODE}
 							<!-- prices -->
@@ -426,6 +426,17 @@
 							</div> <!-- end attributes -->
 						{/if}
 					</div> <!-- end product_attributes -->
+					<div class="box-cart-bottom">
+<!--						<div{if (!$allow_oosp && $product->quantity <= 0) || !$product->available_for_order || (isset($restricted_country_mode) && $restricted_country_mode) || $PS_CATALOG_MODE} class="unvisible"{/if}> -->
+						<div{if (!$allow_oosp && $product->quantity <= 0) || !$product->available_for_order || (isset($restricted_country_mode) && $restricted_country_mode) || $PS_CATALOG_MODE} class="unvisible"{/if}> 
+							<p id="add_to_cart" class="buttons_bottom_block no-print">
+								<button type="submit" name="Submit" class="exclusive" style="margin-left:auto;margin-right:auto; width:100%;">
+									<span >{if $content_only && (isset($product->customization_required) && $product->customization_required)}{l s='Customize'}{else}COMMANDER<br>LE PRODUIT{/if}</span>
+								</button>
+							</p>
+						</div>
+						{if isset($HOOK_PRODUCT_ACTIONS) && $HOOK_PRODUCT_ACTIONS}{$HOOK_PRODUCT_ACTIONS}{/if}
+					</div> <!-- end box-cart-bottom -->
     {if $shoppingList}
 		<div class="shopping_list_block clear">
 			<!-- référencer -->

@@ -270,14 +270,14 @@ class ShoppingList extends Module {
 
         $this->createDefaultShoppingListIfNotExist();
 
-        return $this->display(__FILE__, 'views/templates/hook/customer_account.tpl');
+       // return $this->display(__FILE__, 'views/templates/hook/customer_account.tpl');
 
     }
 	public function hookAdminCustomers() {
 
         $this->createDefaultShoppingListIfNotExist();
 
-        return $this->display(__FILE__, 'views/templates/hook/customer_account.tpl');
+        //return $this->display(__FILE__, 'views/templates/hook/customer_account.tpl');
 
     }
 

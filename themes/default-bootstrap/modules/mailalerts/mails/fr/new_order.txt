@@ -2,6 +2,7 @@
 [cmdprestashop]
 [id]{order_id}[/id]
 [name]{order_name}[/name]
+[origine]HOBIVIN[/origine]
 [customer_id]{customer_id}[/customer_id]
 		[livraison_company]{delivery_company}[/livraison_company]
 		[livraison_name]{delivery_lastname}[/livraison_name]

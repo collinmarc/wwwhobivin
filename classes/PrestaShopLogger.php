@@ -111,6 +111,12 @@ class    PrestaShopLoggerCore extends ObjectModel
         $log->message = pSQL($message);
         $log->date_add = date('Y-m-d H:i:s');
         $log->date_upd = date('Y-m-d H:i:s');
+		
+		//MCII : 05/05/2017 Ajout d'un log fichier
+		$logger = new FileLogger(0); //0 == debug level, logDebug() wonâ€™t work without this.
+		$logger->setFilename(_PS_ROOT_DIR_.'/log/PrestashopLogger.log');
+		$logger->logDebug($message."(Severity=".$severity.",ErrorCode".$error_code.",object_Type=".$object_type.",object_id=".$object_id.",allow_duplicate=".$allow_duplicate.",id_employee=".$id_employee.")");
+
 
         if ($id_employee === null && isset(Context::getContext()->employee) && Validate::isLoadedObject(Context::getContext()->employee)) {
             $id_employee = Context::getContext()->employee->id;

@@ -350,6 +350,7 @@ class MailCore extends ObjectModel
             $template_vars = array_merge($template_vars, $extra_template_vars);
             $swift->attachPlugin(new Swift_Plugin_Decorator(array($to_plugin => $template_vars)), 'decorator');
             if ($configuration['PS_MAIL_TYPE'] == Mail::TYPE_BOTH || $configuration['PS_MAIL_TYPE'] == Mail::TYPE_TEXT) {
+				PrestaShopLogger::addlog("Ajout du .txt". $template_txt);
                 $message->attach(new Swift_Message_Part($template_txt, 'text/plain', '8bit', 'utf-8'));
             }
             if ($configuration['PS_MAIL_TYPE'] == Mail::TYPE_BOTH || $configuration['PS_MAIL_TYPE'] == Mail::TYPE_HTML) {
@@ -416,9 +417,11 @@ class MailCore extends ObjectModel
             if ($smtpChecked) {
                 $smtp = new Swift_Connection_SMTP($smtpServer, $smtpPort, ($smtpEncryption == 'off') ?
                     Swift_Connection_SMTP::ENC_OFF : (($smtpEncryption == 'tls') ? Swift_Connection_SMTP::ENC_TLS : Swift_Connection_SMTP::ENC_SSL));
+					PrestaShopLogger::addLog('username='.$smtpLogin);
+					PrestaShopLogger::addLog('password='.$smtpPassword);
                 $smtp->setUsername($smtpLogin);
                 $smtp->setpassword($smtpPassword);
-                $smtp->setTimeout(5);
+                $smtp->setTimeout(4);
                 $swift = new Swift($smtp, Configuration::get('PS_MAIL_DOMAIN'));
             } else {
                 $swift = new Swift(new Swift_Connection_NativeMail(), Configuration::get('PS_MAIL_DOMAIN'));

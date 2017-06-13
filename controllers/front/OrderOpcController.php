@@ -557,7 +557,8 @@ class OrderOpcControllerCore extends ParentOrderController
         $address_delivery = new Address($this->context->cart->id_address_delivery);
         $address_invoice = ($this->context->cart->id_address_delivery == $this->context->cart->id_address_invoice ? $address_delivery : new Address($this->context->cart->id_address_invoice));
         if (!$this->context->cart->id_address_delivery || !$this->context->cart->id_address_invoice || !Validate::isLoadedObject($address_delivery) || !Validate::isLoadedObject($address_invoice) || $address_invoice->deleted || $address_delivery->deleted) {
-            return '<p class="warning">'.Tools::displayError('Error: Please select an address.').'</p>';
+			
+            return '<p class="warning" id_adresse='.$this->context->cart->id_address_delivery.' >'.Tools::displayError('Error: Please select an address.').'</p>';
         }
         if (count($this->context->cart->getDeliveryOptionList()) == 0 && !$this->context->cart->isVirtualCart()) {
             if ($this->context->cart->isMultiAddressDelivery()) {
