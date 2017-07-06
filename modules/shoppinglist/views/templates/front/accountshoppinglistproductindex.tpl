@@ -11,20 +11,7 @@
 {capture name=path}<a href="{$link->getPageLink('my-account', true)|escape:'html':'UTF-8'}">{l s='Mon Compte'}</a><span class="navigation-pipe">{$navigationPipe}</span><span class="navigation_page">{l s='Ma commande pré-établie' mod='shoppinglist'}</span>{/capture}
 
 <!--<h1 class="page-heading">{l s='Ma commande pré-établie' mod='shoppinglist'}</h1>-->
-{if $errors}
-    <div class="error alert alert-danger">
-        {foreach from=$errors item=error}
-            <p>{$error}</p>
-        {/foreach} 
-    </div>
-{/if}
-{if $messages}
-    <div class="warning alert alert-warning">
-        {foreach from=$messages item=message}
-            <p>{$message}</p>
-        {/foreach} 
-    </div>
-{/if}
+
 
 {if $shoppingListProducts}
 
@@ -68,20 +55,6 @@
                         
                         <input type="text" name="qty_{$itemList.id_product}" id="qty_{$itemList.id_product}" value="" style="width:50px;text-align:center">
 
-						<!-- Ajouter au panier 
-                        <a class="quickAddToBasket btn btn-default button button-small" id="{$itemList.id_product}" data-attribute="{$itemList.id_product_attribute}">
-                            <span>
-                                Ajouter au panier
-                            </span>
-                        </a>
-						-->
-						<!-- Supprimer de la shoppingList
-                        <a class="pull-right btn btn-default button button-small" href="{$link->getModuleLink('shoppinglist', 'accountshoppinglistproduct', ['action' => 'delete', 'id_shopping_list' => $itemList.id_shopping_list, 'id_product' => $itemList.id_product, 'id_product_attribute' => $itemList.id_product_attribute])}?id_product={$itemList.id_product}">
-                            <span>
-                                <i class="icon-trash right"></i>
-                            </span>
-                        </a>
-						-->
                         
                     </td>
                 </tr>
@@ -89,7 +62,7 @@
         </tbody>
     </table>
 {else}
-    <p id="no-product">{l s='No product in this shopping list' mod='shoppinglist'}</p>
+    <p id="no-product">{l s='Pas de produit référencé' }</p>
 {/if}
 
 <ul class="action">
@@ -106,13 +79,12 @@
         </li>
     {/if}
     <li>
-        <a class="back-shopping-list btn btn-default button button-medium exclusive" href="{$link->getModuleLink('shoppinglist', 'accountshoppinglist', ['id_shopping_list' => $shoppingListObj->id_shopping_list])}">
+       <a class="back-shopping-list btn btn-default button button-medium exclusive" href="{$link->getPageLink('my-account', true)|escape:'html':'UTF-8'}">
             <span>
-                <img class="icon" src="{$base_dir}modules/shoppinglist/img/back.png" alt="{l s='Back to list' mod='shoppinglist'}">
-                {l s='Retour à mon compte' mod='shoppinglist'}<i class="icon-chevron-left right"></i>
+                {l s='Retour à mon compte'}<i class="icon-chevron-left right"></i>
             </span>
         </a>
-    </li>
+     </li>
 </ul>
 	</form>
 
