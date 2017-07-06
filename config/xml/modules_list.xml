@@ -127,6 +127,7 @@
 		<module name="ccbill"/>
 		<module name="chargeback"/>
 		<module name="chronopost"/>
+		<module name="comnpay"/>
 		<module name="correos"/>
 		<module name="cubyn"/>
 		<module name="desjardins"/>
@@ -140,6 +141,7 @@
 		<module name="envoimoinscher"/>
 		<module name="eo_wing"/>
 		<module name="etranslation"/>
+		<module name="feedbiz"/>
 		<module name="fianetfraud"/>
 		<module name="fianetsceau"/>
 		<module name="g2apay"/>
@@ -161,6 +163,7 @@
 		<module name="moneybookers"/>
 		<module name="nimblepayment"/>
 		<module name="nostotagging"/>
+		<module name="oct8ne"/>
 		<module name="ogone"/>
 		<module name="onehopsmsservice"/>
 		<module name="openpayprestashop"/>
@@ -198,10 +201,13 @@
 		<module name="steerfox"/>
 		<module name="stripe_official"/>
 		<module name="themoneytizer"/>
+		<module name="triggmine"/>
 		<module name="trustedshops"/>
 		<module name="trustedshopsintegration"/>
 		<module name="twenga"/>
+		<module name="upela"/>
 		<module name="wirecardceecheckoutseamless"/>
+		<module name="worldcoo"/>
 		<module name="worldpay"/>
 	</modules>
 </modules_list>

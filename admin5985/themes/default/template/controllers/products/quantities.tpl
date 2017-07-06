@@ -1,5 +1,5 @@
 {*
-* 2007-2015 PrestaShop
+* 2007-2016 PrestaShop
 *
 * NOTICE OF LICENSE
 *
@@ -18,7 +18,7 @@
 * needs please refer to http://www.prestashop.com for more information.
 *
 *  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
+*  @copyright  2007-2016 PrestaShop SA
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
@@ -158,7 +158,7 @@
 								</tr>
 							</thead>
 							{foreach from=$attributes item=attribute}
-								<tr{if $attribute['default_on']} class="highlighted"{/if}>
+								<tr{if isset($attribute['default_on']) && $attribute['default_on']} class="highlighted"{/if}>
 									<td class="available_quantity" id="qty_{$attribute['id_product_attribute']}">
 										<span>{$available_quantity[$attribute['id_product_attribute']]}</span>
 										<input type="text" name="qty_{$attribute['id_product_attribute']}" class="fixed-width-sm" value="{$available_quantity[$attribute['id_product_attribute']]|htmlentities}"/>
@@ -214,8 +214,8 @@
 		{/if}
 		<div class="panel-footer">
 			<a href="{$link->getAdminLink('AdminProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
-			<button type="submit" name="submitAddproduct" class="btn btn-default pull-right" ><i class="process-icon-save"></i></i> {l s='Save'}</button>
-			<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" ><i class="process-icon-save"></i> {l s='Save and stay'}</button>
+			<button type="submit" name="submitAddproduct" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i></i> {l s='Save'}</button>
+			<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save and stay'}</button>
 		</div>
 	</div>
 	<div class="panel">
@@ -286,8 +286,8 @@
 		{/if}
 		<div class="panel-footer">
 			<a href="{$link->getAdminLink('AdminProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
-			<button type="submit" name="submitAddproduct" class="btn btn-default pull-right" ><i class="process-icon-save"></i> {l s='Save'}</button>
-			<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" ><i class="process-icon-save"></i> {l s='Save and stay'}</button>
+			<button type="submit" name="submitAddproduct" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save'}</button>
+			<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save and stay'}</button>
 		</div>
 		<script type="text/javascript">
 			var quantities_ajax_success = '{l s='Data saved' js=1}';

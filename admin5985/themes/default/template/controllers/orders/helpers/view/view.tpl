@@ -1,5 +1,5 @@
 {*
-* 2007-2015 PrestaShop
+* 2007-2016 PrestaShop
 *
 * NOTICE OF LICENSE
 *
@@ -18,7 +18,7 @@
 * needs please refer to http://www.prestashop.com for more information.
 *
 *  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
+*  @copyright  2007-2016 PrestaShop SA
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
@@ -328,17 +328,17 @@
 								<table class="table">
 									<thead>
 										<tr>
-											<th><span class="title_box ">Date</span></th>
-											<th><span class="title_box ">Type</span></th>
-											<th><span class="title_box ">Carrier</span></th>
-											<th><span class="title_box ">Tracking number</span></th>
+											<th><span class="title_box ">{l s='Date'}</span></th>
+											<th><span class="title_box ">{l s='Type'}</span></th>
+											<th><span class="title_box ">{l s='Carrier'}</span></th>
+											<th><span class="title_box ">{l s='Tracking number'}</span></th>
 										</tr>
 									</thead>
 									<tbody>
 										{foreach from=$order->getReturn() item=line}
 										<tr>
 											<td>{$line.date_add}</td>
-											<td>{$line.type}</td>
+											<td>{l s=$line.type}</td>
 											<td>{$line.state_name}</td>
 											<td class="actions">
 												<span class="shipping_number_show">{if isset($line.url) && isset($line.tracking_number)}<a href="{$line.url|replace:'@':$line.tracking_number|escape:'html':'UTF-8'}">{$line.tracking_number}</a>{elseif isset($line.tracking_number)}{$line.tracking_number}{/if}</span>
@@ -917,6 +917,12 @@
 								<tr>
 									<th></th>
 									<th><span class="title_box ">{l s='Product'}</span></th>
+									{if ($order->getTaxCalculationMethod() != $smarty.const.PS_TAX_EXC)}
+									<th>
+										<span class="title_box ">{l s='Unit Price'}</span>
+										<small class="text-muted">{l s='tax excluded.'}</small>
+									</th>
+									{/if}
 									<th>
 										<span class="title_box ">{l s='Unit Price'}</span>
 										<small class="text-muted">{$smarty.capture.TaxMethod}</small>
@@ -1372,17 +1378,21 @@
 
 		// Fix wrong maps center when map is hidden
 		$('#tabAddresses').click(function(){
+		if (delivery_map) {
 			x = delivery_map.getZoom();
 			c = delivery_map.getCenter();
 			google.maps.event.trigger(delivery_map, 'resize');
 			delivery_map.setZoom(x);
 			delivery_map.setCenter(c);
-
+		}
+      
+		if (invoice_map) {
 			x = invoice_map.getZoom();
 			c = invoice_map.getCenter();
 			google.maps.event.trigger(invoice_map, 'resize');
 			invoice_map.setZoom(x);
 			invoice_map.setCenter(c);
+		  }
 		});
 	</script>
 

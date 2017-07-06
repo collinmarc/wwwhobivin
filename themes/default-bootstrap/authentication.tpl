@@ -45,10 +45,12 @@
 		<link rel="icon" type="image/vnd.microsoft.icon" href="{$favicon_url}?{$img_update_time}" />
 		<link rel="shortcut icon" type="image/x-icon" href="{$favicon_url}?{$img_update_time}" />
 		<!-- Start WOWSlider.com HEAD section -->
-        <link rel="stylesheet" type="text/css" href="/diaporama/engine1/style.css" />
-        <script type="text/javascript" src="/diaporama/engine1/jquery.js"></script>
-		<script type="text/javascript" src="/diaporama/engine1/wowslider.js"></script>
-<script type="text/javascript" src="/diaporama/engine1/script.js"></script>
+		<!--
+        <link rel="stylesheet" type="text/css" href="diaporama/engine1/style.css" />
+        <script type="text/javascript" src="diaporama/engine1/jquery.js"></script>
+		<script type="text/javascript" src="diaporama/engine1/wowslider.js"></script>
+<script type="text/javascript" src="diaporama/engine1/script.js"></script>
+		-->
         <!-- End WOWSlider.com HEAD section -->
 		{if isset($css_files)}
 			{foreach from=$css_files key=css_uri item=media}
@@ -88,10 +90,10 @@
 	</td>
 	  <TD style="color:white;" width="80%">
 	  <B>
-	  <P>{l s='Bienvenue sur votre compte Vinicom, merci de vous identifier'}</P>
+	  <P>{l s='Bienvenue sur votre compte , merci de vous identifier'}</P>
 	  <P>{l s='Vous trouverez dans votre compte : '}</P>
-	  <P>{l s='- votre bon de commande pré-établi regroupe tous les produits que vous commandez habituellement. Ajoutez les articles au panier pour passer votre commande en toute simplicité.'}</P>
-	  <P>{l s="- le catalogue Vinicom qui vous permet d'accéder à l'ensemble des produits vendus sur le site, des caisses bois aux fontaines à vin."}</P>
+	  <P>{l s='- votre bon de commande pré-établi qui regroupe tous les produits que vous commandez habituellement. Sélectionner les articles dont vous avez besoin et cliquer sur "Préparer votre commande".'}</P>
+	  <P>{l s="- le catalogue  qui vous permet d'accéder à l'ensemble des produits vendus sur le site."}</P>
 	  <P>{l s="- l'historique et détails des commandes vous donne accès aux précédentes commandes passées depuis le site."}</P>
 	  <P>{l s='Nous vous accompagnons pour toutes vos questions au 02 99 68 89 12.'}</P>
 	  <P>{l s='Bonne navigation !'}</P>

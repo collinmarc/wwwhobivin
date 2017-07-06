@@ -44,10 +44,13 @@
 		<link rel="icon" type="image/vnd.microsoft.icon" href="{$favicon_url}?{$img_update_time}" />
 		<link rel="shortcut icon" type="image/x-icon" href="{$favicon_url}?{$img_update_time}" />
 		<!-- Start WOWSlider.com HEAD section -->
-        <link rel="stylesheet" type="text/css" href="/diaporama/engine1/style.css" />
-        <script type="text/javascript" src="/diaporama/engine1/jquery.js"></script>
-		<script type="text/javascript" src="/diaporama/engine1/wowslider.js"></script>
-<script type="text/javascript" src="/diaporama/engine1/script.js"></script>
+		<!--
+       <link rel="stylesheet" type="text/css" href="diaporama/engine1/style.css" />
+        <script type="text/javascript" src="diaporama/engine1/jquery.js"></script>
+		<script type="text/javascript" src="diaporama/engine1/wowslider.js"></script>
+		<script type="text/javascript" src="diaporama/engine1/script.js"></script>
+		-->
+
         <!-- End WOWSlider.com HEAD section -->
 		{if isset($css_files)}
 			{foreach from=$css_files key=css_uri item=media}

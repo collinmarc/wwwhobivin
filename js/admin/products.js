@@ -17,7 +17,7 @@
 * needs please refer to http://www.prestashop.com for more information.
 *
 *  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
+*  @copyright  2007-2016 PrestaShop SA
 *  @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
@@ -28,10 +28,16 @@
 function ProductTabsManager(){
 	var self = this;
 	this.product_tabs = [];
+	this.tabs_to_preload = [];
 	this.current_request;
-	this.stack_error = [];
+	this.stack_done = [];
 	this.page_reloading = false;
 	this.has_error_loading_tabs = false;
+
+	/**
+	* Show / Hide languages semaphore
+	*/
+	this.allow_hide_other_languages = true;
 
 	this.setTabs = function(tabs){
 		this.product_tabs = tabs;
@@ -42,8 +48,10 @@ function ProductTabsManager(){
 	 */
 	this.init = function() {
 		for (var tab_name in this.product_tabs) {
-			if (this.product_tabs[tab_name].onReady !== undefined && this.product_tabs[tab_name] !== this.product_tabs['Pack'] )
+			if (this.product_tabs[tab_name].onReady !== undefined && this.product_tabs[tab_name] !== this.product_tabs['Pack'])
+			{
 				this.onLoad(tab_name, this.product_tabs[tab_name].onReady);
+			}
 		}
 
 		$('.shopList.chzn-done').on('change', function(){
@@ -87,19 +95,14 @@ function ProductTabsManager(){
 	 */
 	this.display = function (tab_name, selected)
 	{
-		if (mod_evasive || mod_security)
-			sleep(1);
-
 		var tab_selector = $("#product-tab-content-" + tab_name);
+		$('#product-tab-content-wait').hide();
 
 		// Is the tab already being loaded?
 		if (tab_selector.hasClass('not-loaded') && !tab_selector.hasClass('loading'))
 		{
 			// Mark the tab as being currently loading
 			tab_selector.addClass('loading');
-
-			if (selected)
-				$('#product-tab-content-wait').show();
 
 			// send $_POST array with the request to be able to retrieve posted data if there was an error while saving product
 			var data;
@@ -111,14 +114,14 @@ function ProductTabsManager(){
 				// set key_tab so that the ajax call returns the display for the current tab
 				data.key_tab = tab_name;
 			}
-
 			return $.ajax({
-				url : $('#link-'+tab_name).attr("href")+"&ajax=1" + '&rand=' + new Date().getTime(),
+				url : $('#link-' + tab_name).attr('href') + '&ajax=1' + ($('#page').length ? '&page=' + parseInt($('#page').val()) : '') + '&rand=' + + new Date().getTime(),
 				async : true,
 				cache: false, // cache needs to be set to false or IE will cache the page with outdated product values
 				type: send_type,
 				headers: { "cache-control": "no-cache" },
 				data: data,
+				timeout: 30000,
 				success : function(data)
 				{
 					tab_selector.html(data).find('.dropdown-toggle').dropdown();
@@ -127,8 +130,10 @@ function ProductTabsManager(){
 					if (selected)
 					{
 						$("#link-"+tab_name).addClass('selected');
+						$('#product-tab-content-wait').hide();
 						tab_selector.show();
 					}
+					self.stack_done.push(tab_name);
 					tab_selector.trigger('loaded');
 				},
 				complete : function(data)
@@ -136,7 +141,6 @@ function ProductTabsManager(){
 					tab_selector.removeClass('loading');
 					if (selected)
 					{
-						$('#product-tab-content-wait').hide();
 						tab_selector.trigger('displayed');
 					}
 				},
@@ -145,51 +149,65 @@ function ProductTabsManager(){
 					// don't display the loading notification bar
 					if (typeof(ajax_running_timeout) !== 'undefined')
 						clearTimeout(ajax_running_timeout);
+					if (selected) {
+						$('#product-tab-content-wait').show();
+					}
 				}
 			});
 		}
 	}
 
 	/**
-	 * Send an ajax call for each tab in the stack, binding each call to the "complete" event of the previous call
+	 * Send an ajax call for each tab in the stack
 	 *
 	 * @param array stack contains tab names as strings
 	 */
 	this.displayBulk = function(stack){
-		
-			$('[name="submitAddproductAndStay"]').each(function() {
-				$(this).prop('disabled', false).find('i').removeClass('process-icon-loading').addClass('process-icon-save');
-			});
-			$('[name="submitAddproduct"]').each(function() {
-				$(this).prop('disabled', false).find('i').removeClass('process-icon-loading').addClass('process-icon-save');
-			});
 		this.current_request = this.display(stack[0], false);
 
 		if (this.current_request !== undefined)
 		{
 			this.current_request.complete(function(request, status) {
-				if (status === 'abort' || status === 'error')
-					self.stack_error.push(stack.shift());
-				else
-					stack.shift()
-				if (stack.length !== 0 && status !== 'abort')
-				{
-					self.displayBulk(stack);
+				var wrong_statuses = new Array('abort', 'error', 'timeout');
+				var wrong_status_code = new Array(400, 401, 403, 404, 405, 406, 408, 410, 413, 429, 499, 500, 502, 503, 504);
+
+				if ((in_array(status, wrong_statuses) || in_array(request.status, wrong_status_code)) && !self.page_reloading) {
+					var current_tab = '';
+					if (request.responseText !== 'undefined' && request.responseText && request.responseText.length) {
+						current_tab = $(request.responseText).filter('.product-tab').attr('id').replace('product-', '');
+					}
+
+					jAlert((current_tab ? 'Tab : ' + current_tab : '') + ' (' + (request.status ? request.status + ' ' : '' ) + request.statusText + ')\n' + reload_tab_description, reload_tab_title);
+					self.page_reloading = true;
+					self.has_error_loading_tabs = true;
+					clearTimeout(tabs_running_timeout);
+					return false;
 				}
-				else if (self.stack_error.length !== 0 && !self.page_reloading)
-				{
-					jConfirm(reload_tab_description, reload_tab_title, function(confirm) {
-						if (confirm === true)
-						{
-							self.displayBulk(self.stack_error.slice(0));
-							self.stack_error = [];
-						}
-						else
-							return false;
-					});
-				}
+				else if (!self.has_error_loading_tabs && (self.stack_done.length === self.tabs_to_preload.length)) {
+						$('[name="submitAddproductAndStay"]').each(function() {
+							$(this).prop('disabled', false).find('i').removeClass('process-icon-loading').addClass('process-icon-save');
+						});
+						$('[name="submitAddproduct"]').each(function() {
+							$(this).prop('disabled', false).find('i').removeClass('process-icon-loading').addClass('process-icon-save');
+						});
+						this.allow_hide_other_languages = true;
+						clearTimeout(tabs_running_timeout);
+						return false;
+					}
+				return true;
 			});
 		}
+		/*In order to prevent mod_evasive DOSPageInterval (Default 1s)*/
+		var time = 0;
+		if (mod_evasive) {
+			time = 1000;
+		}
+		var tabs_running_timeout = setTimeout(function(){
+			stack.shift();
+			if (stack.length > 0) {
+				self.displayBulk(stack);
+			}
+		}, time);
 	}
 }
 
@@ -215,6 +233,12 @@ function loadPack() {
 // The ProductTabsManager instance will make sure the onReady() methods of each tabs are executed once the tab has loaded
 var product_tabs = [];
 
+product_tabs['Customization'] = new function(){
+	this.onReady = function(){
+		if (display_multishop_checkboxes)
+		ProductMultishop.checkAllCustomization();
+	}
+}
 product_tabs['Combinations'] = new function(){
 	var self = this;
 	this.bindEdit = function(){
@@ -235,7 +259,6 @@ product_tabs['Combinations'] = new function(){
 				context: document.body,
 				dataType: 'json',
 				context: this,
-				async: false,
 				success: function(data) {
 					// color the selected line
 					parent.siblings().removeClass('selected-line');
@@ -312,7 +335,6 @@ product_tabs['Combinations'] = new function(){
 			context: document.body,
 			dataType: 'json',
 			context: this,
-			async: false,
 			success: function(data) {
 				if (data.status == 'ok')
 				{
@@ -344,7 +366,6 @@ product_tabs['Combinations'] = new function(){
 			context: document.body,
 			dataType: 'json',
 			context: this,
-			async: false,
 			success: function(data) {
 				if (data.status == 'ok')
 				{
@@ -713,10 +734,8 @@ product_tabs['Prices'] = new function(){
 				data: {
 					ajax: true
 				},
-				context: document.body,
 				dataType: 'json',
 				context: this,
-				async: false,
 				success: function(data) {
 					if (data !== null)
 					{
@@ -772,7 +791,7 @@ product_tabs['Associations'] = new function(){
 	var self = this;
 	this.initAccessoriesAutocomplete = function (){
 		$('#product_autocomplete_input')
-			.autocomplete('ajax_products_list.php', {
+			.autocomplete('ajax_products_list.php?exclude_packs=0&excludeVirtuals=0', {
 				minChars: 1,
 				autoFill: true,
 				max:20,
@@ -1006,7 +1025,7 @@ product_tabs['Informations'] = new function(){
 		});
 
 		$('#related_product_autocomplete_input')
-			.autocomplete('ajax_products_list.php?excludeIds='+id_product, {
+			.autocomplete('ajax_products_list.php?exclude_packs=0&excludeVirtuals=0&excludeIds='+id_product, {
 				minChars: 1,
 				autoFill: true,
 				max:20,
@@ -1194,7 +1213,7 @@ product_tabs['Pack'] = new function() {
 	this.bindPackEvents = function () {
 
 		$('.delPackItem').on('click', function() {
-			delPackItem($(this).data('delete'));
+			delPackItem($(this).data('delete'), $(this).data('delete-attr'));
 		});
 
 		function productFormatResult(item) {
@@ -1233,9 +1252,13 @@ product_tabs['Pack'] = new function() {
 					var returnIds = new Array();
 					if (data) {
 						for (var i = data.length - 1; i >= 0; i--) {
-							if ($.inArray(data[i].id, excludeIds) <= -1) {
-								returnIds.push(data[i]);
+							var is_in = 0;
+							for (var j = 0; j < excludeIds.length; j ++) {
+								if (data[i].id == excludeIds[j][0] && (typeof data[i].id_product_attribute == 'undefined' || data[i].id_product_attribute == excludeIds[j][1]))
+									is_in = 1;
 							}
+							if (!is_in)
+								returnIds.push(data[i]);
 						}
 						return {
 							results: returnIds
@@ -1267,19 +1290,23 @@ product_tabs['Pack'] = new function() {
 					error_modal(error_heading_msg, msg_set_quantity);
 					return false;
 				}
+
+				if (typeof selectedProduct.id_product_attribute === 'undefined')
+					selectedProduct.id_product_attribute = 0;
+
 				var divContent = $('#divPackItems').html();
-				divContent += '<li class="product-pack-item media-product-pack" data-product-name="' + selectedProduct.name + '" data-product-qty="' + selectedProduct.qty + '" data-product-id="' + selectedProduct.id + '">';
+				divContent += '<li class="product-pack-item media-product-pack" data-product-name="' + selectedProduct.name + '" data-product-qty="' + selectedProduct.qty + '" data-product-id="' + selectedProduct.id + '" data-product-id-attribute="' + selectedProduct.id_product_attribute + '">';
 				divContent += '<img class="media-product-pack-img" src="' + selectedProduct.image +'"/>';
 				divContent += '<span class="media-product-pack-title">' + selectedProduct.name + '</span>';
 				divContent += '<span class="media-product-pack-ref">REF: ' + selectedProduct.ref + '</span>';
 				divContent += '<span class="media-product-pack-quantity"><span class="text-muted">x</span> ' + selectedProduct.qty + '</span>';
-				divContent += '<button type="button" class="btn btn-default delPackItem media-product-pack-action" data-delete="' + selectedProduct.id + '" ><i class="icon-trash"></i></button>';
+				divContent += '<button type="button" class="btn btn-default delPackItem media-product-pack-action" data-delete="' + selectedProduct.id + '" data-delete-attr="' + selectedProduct.id_product_attribute + '"><i class="icon-trash"></i></button>';
 				divContent += '</li>';
 
 				// QTYxID-QTYxID
 				// @todo : it should be better to create input for each items and each qty
 				// instead of only one separated by x, - and ¤
-				var line = selectedProduct.qty + 'x' + selectedProduct.id ;
+				var line = selectedProduct.qty + 'x' + selectedProduct.id + 'x' + selectedProduct.id_product_attribute;
 				var lineDisplay = selectedProduct.qty + 'x ' + selectedProduct.name;
 
 				$('#divPackItems').html(divContent);
@@ -1289,7 +1316,7 @@ product_tabs['Pack'] = new function() {
 				$('.delPackItem').on('click', function(e){
 					e.preventDefault();
 					e.stopPropagation();
-					delPackItem($(this).data('delete'));
+					delPackItem($(this).data('delete'), $(this).data('delete-attr'));
 				})
 				selectedProduct = null;
 				$('#curPackItemName').select2("val", "");
@@ -1300,7 +1327,7 @@ product_tabs['Pack'] = new function() {
 			}
 		}
 
-		function delPackItem(id) {
+		function delPackItem(id, id_attribute) {
 
 			var reg = new RegExp('-', 'g');
 			var regx = new RegExp('x', 'g');
@@ -1313,17 +1340,16 @@ product_tabs['Pack'] = new function() {
 
 			input.val(null);
 			name.val(null);
-
 			for (var i = 0; i < inputCut.length; ++i)
 				if (inputCut[i]) {
 					var inputQty = inputCut[i].split(regx);
-					if (inputQty[1] != id) {
+					if (inputQty[1] != id || inputQty[2] != id_attribute) {
 						input.val( input.val() + inputCut[i] + '-' );
 						name.val( name.val() + nameCut[i] + '¤');
 					}
 				}
 
-			var elem = $('.product-pack-item[data-product-id = "' + id + '"]');
+			var elem = $('.product-pack-item[data-product-id="' + id + '"][data-product-id-attribute="' + id_attribute + '"]');
 			elem.remove();
 
 			if ($('.product-pack-item').length === 0){
@@ -1333,20 +1359,28 @@ product_tabs['Pack'] = new function() {
 
 		function getSelectedIds()
 		{
-			if ($('#inputPackItems').val() === undefined)
+			var reg = new RegExp('-', 'g');
+			var regx = new RegExp('x', 'g');
+
+			var input = $('#inputPackItems');
+
+			if (input.val() === undefined)
 				return '';
-			var ids = '';
-			if (typeof(id_product) != 'undefined')
-				ids += id_product + ',';
 
-			ids += $('#inputPackItems').val().replace(/\d*x/g, '').replace(/\-/g,',');
-			ids = ids.replace(/\,$/,'');
-			ids = ids.split(',');
-			ints = new Array();
+			var inputCut = input.val().split(reg);
 
-			for (var i=0; i < ids.length; i++) {
-		        ints[i] = parseInt(ids[i]);
-		    }
+			var ints = new Array();
+
+			for (var i = 0; i < inputCut.length; ++i)
+			{
+				var in_ints = new Array();
+				if (inputCut[i]) {
+					var inputQty = inputCut[i].split(regx);
+					in_ints[0] = inputQty[1];
+					in_ints[1] = inputQty[2];
+				}
+				ints[i] = in_ints;
+			}
 
 			return ints;
 		}
@@ -1403,10 +1437,10 @@ product_tabs['Quantities'] = new function(){
 				showSuccessMessage(quantities_ajax_success);
 			},
 			error: function(jqXHR, textStatus, errorThrown)
-  			{
+			{
 				if (textStatus != 'error' || errorThrown != '')
 					showErrorMessage(textStatus + ': ' + errorThrown);
-  			}
+			}
 		});
 	};
 
@@ -1474,6 +1508,12 @@ product_tabs['Quantities'] = new function(){
 		});
 		if (display_multishop_checkboxes)
 			ProductMultishop.checkAllQuantities();
+
+		$('.pack_stock_type').click(function(e)
+		{
+			self.refreshQtyAvailabilityForm();
+			self.ajaxCall({actionQty: 'pack_stock_type', value: $(this).val()});
+		});
 
 		self.refreshQtyAvailabilityForm();
 	};
@@ -1667,7 +1707,6 @@ function ajaxAction (url, action, success_callback, failure_callback){
 		},
 		dataType: 'json',
 		context: this,
-		async: false,
 		success: function(data) {
 			if (data.status == 'ok')
 			{
@@ -1710,33 +1749,27 @@ var ProductMultishop = new function()
 						tinyMCE.get(id).show();
 				}
 				break;
-
 			case 'radio' :
 				$('input[name=\''+id+'\']').attr('disabled', checked);
 				break;
-
 			case 'show_price' :
 				if ($('input[name=\'available_for_order\']').prop('checked'))
 					checked = true;
 				$('input[name=\''+id+'\']').attr('disabled', checked);
 				break;
-
 			case 'price' :
 				$('#priceTE').attr('disabled', checked);
 				$('#priceTI').attr('disabled', checked);
 				break;
-
 			case 'unit_price' :
 				$('#unit_price').attr('disabled', checked);
 				$('#unity').attr('disabled', checked);
 				break;
-
 			case 'attribute_price_impact' :
 				$('#attribute_price_impact').attr('disabled', checked);
 				$('#attribute_price').attr('disabled', checked);
 				$('#attribute_priceTI').attr('disabled', checked);
 				break;
-
 			case 'category_box' :
 				$('#'+id+' input[type=checkbox]').attr('disabled', checked);
 				if (!checked) {
@@ -1747,21 +1780,26 @@ var ProductMultishop = new function()
 					$('#uncheck-all-'+id).attr('disabled', 'disabled');
 				}
 				break;
-
 			case 'attribute_weight_impact' :
 				$('#attribute_weight_impact').attr('disabled', checked);
 				$('#attribute_weight').attr('disabled', checked);
 				break;
-
 			case 'attribute_unit_impact' :
 				$('#attribute_unit_impact').attr('disabled', checked);
 				$('#attribute_unity').attr('disabled', checked);
 				break;
-
 			case 'seo_friendly_url':
 				$('#'+id).attr('disabled', checked);
 				$('#generate-friendly-url').attr('disabled', checked);
-
+				break;
+			case 'uploadable_files':
+				$('input[name^=label_0_]').attr('disabled', checked);
+				$('#'+id).attr('disabled', checked);
+				break;
+			case 'text_fields':
+				$('input[name^=label_1_]').attr('disabled', checked);
+				$('#'+id).attr('disabled', checked);
+				break;
 			default :
 				$('#'+id).attr('disabled', checked);
 				break;
@@ -1822,6 +1860,12 @@ var ProductMultishop = new function()
 		ProductMultishop.checkField($('input[name=\'multishop_check[id_category_default]\']').prop('checked'), 'associated-categories-tree', 'category_box');
 	};
 
+	this.checkAllCustomization = function()
+	{
+		ProductMultishop.checkField($('input[name=\'multishop_check[uploadable_files]\']').prop('checked'), 'uploadable_files', 'uploadable_files');
+		ProductMultishop.checkField($('input[name=\'multishop_check[text_fields]\']').prop('checked'), 'text_fields', 'text_fields');
+	};
+
 	this.checkAllCombinations = function()
 	{
 		ProductMultishop.checkField($('input[name=\'multishop_check[attribute_wholesale_price]\']').prop('checked'), 'attribute_wholesale_price');
@@ -1862,6 +1906,5 @@ $(document).ready(function() {
 	$('#product_form').submit(function(e) {
 		$('#selectedCarriers option').attr('selected', 'selected');
 		$('#selectAttachment1 option').attr('selected', 'selected');
-		return true;
 	});
 });
