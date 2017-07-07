@@ -1,8 +1,14 @@
 # vinicom.wine
 site internet Vinicom.wine
 
-#V20170629,20170629-2
-Mise à niveau Hobivin
+#V20170707
+#760 : Modification des quantités en préparation de commandes 
+
+#V20170706
+#768 : Produit en double ou triple dans le catalogue
+#776 : 	Logo Hobivin (HBV)
+#777 : mettre à jour le module mailalert avec l'ancienne version 
+
 
 #V20170627,V20170627-2
 #756 BO : La Description produit ne se sauvegarde pas

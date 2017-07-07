@@ -22,7 +22,7 @@
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
-
+//20170706 : #760 : Modification des quantité (ajout d'une opération set)
 $(document).ready(function(){
 	$('.cart_quantity_up').off('click').on('click', function(e){
 		e.preventDefault();
@@ -389,11 +389,14 @@ function updateQty(val, cart, el)
 		var hidden = $(prefix + 'input[name=' + id + '_hidden]').val();
 		var input = $(prefix + 'input[name=' + id + ']').val();
 		var QtyToUp = parseInt(input) - parseInt(hidden);
-
+		/*
 		if (parseInt(QtyToUp) > 0)
 			upQuantity(id.replace('quantity_', ''), QtyToUp);
 		else if(parseInt(QtyToUp) < 0)
 			downQuantity(id.replace('quantity_', ''), QtyToUp);
+		*/
+		setQuantity(id.replace('quantity_', ''), input);
+
 	}
 	else
 		$(prefix + 'input[name=' + id + ']').val($(prefix + 'input[name=' + id + '_hidden]').val());
@@ -782,6 +785,113 @@ function downQuantity(id, qty)
 		deleteProductFromSummary(id);
 	}
 }
+
+function setQuantity(id, qty)
+{
+
+	var val = $('input[name=quantity_' + id + ']').val();
+	var newVal = val;
+	if(typeof(qty) == 'undefined' || !qty)
+	{
+		qty = 1;
+		newVal = val - 1;
+	}
+
+	var customizationId = 0;
+	var productId = 0;
+	var productAttributeId = 0;
+	var id_address_delivery = 0;
+	var ids = 0;
+
+	ids = id.split('_');
+	productId = parseInt(ids[0]);
+	if (typeof(ids[1]) !== 'undefined')
+		productAttributeId = parseInt(ids[1]);
+	if (typeof(ids[2]) !== 'undefined' && ids[2] !== 'nocustom')
+		customizationId = parseInt(ids[2]);
+	if (typeof(ids[3]) !== 'undefined')
+		id_address_delivery = parseInt(ids[3]);
+
+	if (newVal > 0 || $('#product_' + id + '_gift').length)
+	{
+		$.ajax({
+			type: 'POST',
+			headers: { "cache-control": "no-cache" },
+			url: baseUri + '?rand=' + new Date().getTime(),
+			async: true,
+			cache: false,
+			dataType: 'json',
+			data: 'controller=cart'
+				+ '&ajax=true'
+				+ '&add=true'
+				+ '&getproductprice=true'
+				+ '&summary=true'
+				+ '&id_product='+productId
+				+ '&ipa='+productAttributeId
+				+ '&id_address_delivery='+id_address_delivery
+				+ '&op=set'
+				+ ((customizationId !== 0) ? '&id_customization='+customizationId : '')
+				+ '&qty='+qty
+				+ '&token='+static_token
+				+ '&allow_refresh=1',
+			success: function(jsonData)
+			{
+				if (jsonData.hasError)
+				{
+					var errors = '';
+					for(var error in jsonData.errors)
+						//IE6 bug fix
+						if(error !== 'indexOf')
+							errors += $('<div />').html(jsonData.errors[error]).text() + "\n";
+                    if (!!$.prototype.fancybox)
+                        $.fancybox.open([
+                            {
+                                type: 'inline',
+                                autoScale: true,
+                                minHeight: 30,
+                                content: '<p class="fancybox-error">' + errors + '</p>'
+                            }],
+                            {
+                                padding: 0
+                            });
+                    else
+                        alert(errors);
+					$('input[name=quantity_' + id + ']').val($('input[name=quantity_' + id + '_hidden]').val());
+				}
+				else
+				{
+					if (jsonData.refresh)
+						window.location.href = window.location.href;
+					updateCartSummary(jsonData.summary);
+
+					if (window.ajaxCart !== undefined)
+						ajaxCart.updateCart(jsonData);
+					if (customizationId !== 0)
+						updateCustomizedDatas(jsonData.customizedDatas);
+					updateHookShoppingCart(jsonData.HOOK_SHOPPING_CART);
+					updateHookShoppingCartExtra(jsonData.HOOK_SHOPPING_CART_EXTRA);
+
+					if (newVal == 0)
+						$('#product_' + id).hide();
+
+					if (typeof(getCarrierListAndUpdate) !== 'undefined')
+						getCarrierListAndUpdate();
+					if (typeof(updatePaymentMethodsDisplay) !== 'undefined')
+						updatePaymentMethodsDisplay();
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				if (textStatus !== 'abort')
+					alert("TECHNICAL ERROR: unable to save update quantity \n\nDetails:\nError thrown: " + XMLHttpRequest + "\n" + 'Text status: ' + textStatus);
+			}
+		});
+
+	}
+	else
+	{
+		deleteProductFromSummary(id);
+	}
+}//setQuantity
 
 function updateCartSummary(json)
 {

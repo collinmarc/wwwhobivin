@@ -908,7 +908,7 @@ class CartCore extends ObjectModel
      * @param int $quantity Quantity to add (or substract)
      * @param int $id_product Product ID
      * @param int $id_product_attribute Attribute ID if needed
-     * @param string $operator Indicate if quantity must be increased or decreased
+     * @param string $operator Indicate if quantity must be increased (up) or decreased (down) or set (set)
      */
     public function updateQty($quantity, $id_product, $id_product_attribute = null, $id_customization = false,
         $operator = 'up', $id_address_delivery = 0, Shop $shop = null, $auto_add_cart_rule = true)
@@ -980,6 +980,7 @@ class CartCore extends ObjectModel
 
             /* Update quantity if product already exist */
             if ($result) {
+				$qty = ' quantity ';
                 if ($operator == 'up') {
                     $sql = 'SELECT stock.out_of_stock, IFNULL(stock.quantity, 0) as quantity
 							FROM '._DB_PREFIX_.'product p
@@ -993,22 +994,30 @@ class CartCore extends ObjectModel
                         $product_qty = Pack::getQuantity($id_product, $id_product_attribute);
                     }
                     $new_qty = (int)$result['quantity'] + (int)$quantity;
-                    $qty = '+ '.(int)$quantity;
+                    $qty = ' quantity + '.(int)$quantity; //Ajout de la quantité
 
                     if (!Product::isAvailableWhenOutOfStock((int)$result2['out_of_stock'])) {
                         if ($new_qty > $product_qty) {
                             return false;
                         }
                     }
-                } elseif ($operator == 'down') {
-                    $qty = '- '.(int)$quantity;
+                } 
+				if ($operator == 'down') {
+                    $qty = ' quantity - '.(int)$quantity;   // retrait de la quantité
                     $new_qty = (int)$result['quantity'] - (int)$quantity;
                     if ($new_qty < $minimal_quantity && $minimal_quantity > 1) {
                         return -1;
                     }
-                } else {
-                    return false;
-                }
+                } 
+				// Dans le cas du set on fait Quantity =  newQuantity
+				if ($operator == 'set') {
+					PrestaShopLogger::addLog("Cart.updateQty : set");
+                    $qty = ' '.(int)$quantity;  //Affecttation de la quantité
+                    $new_qty = (int)$quantity;
+                    if ($new_qty < $minimal_quantity && $minimal_quantity > 1) {
+                        return -1;
+                    }
+                } 
 
                 /* Delete product from cart */
                 if ($new_qty <= 0) {
@@ -1018,7 +1027,7 @@ class CartCore extends ObjectModel
                 } else {
                     Db::getInstance()->execute('
 						UPDATE `'._DB_PREFIX_.'cart_product`
-						SET `quantity` = `quantity` '.$qty.', `date_add` = NOW()
+						SET `quantity` = '.$qty.' , `date_add` = NOW()
 						WHERE `id_product` = '.(int)$id_product.
                         (!empty($id_product_attribute) ? ' AND `id_product_attribute` = '.(int)$id_product_attribute : '').'
 						AND `id_cart` = '.(int)$this->id.(Configuration::get('PS_ALLOW_MULTISHIPPING') && $this->isMultiAddressDelivery() ? ' AND `id_address_delivery` = '.(int)$id_address_delivery : '').'
