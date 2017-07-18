@@ -1,6 +1,14 @@
 # vinicom.wine
 site internet Vinicom.wine
 
+#V20170718
+#769 : Modif du mail new_oder : mettre la société dans livraison company
+#0000767: Déconnexion intempestive du back-office
+#0000755: Toutes les lignes ne sont pas prise en compte lors de la validation d'une précommande  
+#0000781: Affichage du panier sur la page d'accueil du catalogue (Paramétrage du module)
+#0000765: bouton "Continuer mes achats" 
+#0000766: bouton "Préparer la commande" 
+
 #V20170707
 #760 : Modification des quantités en préparation de commandes 
 

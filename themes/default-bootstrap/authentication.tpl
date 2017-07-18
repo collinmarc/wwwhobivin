@@ -92,7 +92,7 @@
 	  <B>
 	  <P>{l s='Bienvenue sur votre compte , merci de vous identifier'}</P>
 	  <P>{l s='Vous trouverez dans votre compte : '}</P>
-	  <P>{l s='- votre bon de commande pré-établi qui regroupe tous les produits que vous commandez habituellement. Sélectionner les articles dont vous avez besoin et cliquer sur "Préparer votre commande".'}</P>
+	  <P>{l s='- votre bon de commande pré-établie qui regroupe tous les produits que vous commandez habituellement. Sélectionner les articles dont vous avez besoin et cliquer sur "Préparer votre commande".'}</P>
 	  <P>{l s="- le catalogue  qui vous permet d'accéder à l'ensemble des produits vendus sur le site."}</P>
 	  <P>{l s="- l'historique et détails des commandes vous donne accès aux précédentes commandes passées depuis le site."}</P>
 	  <P>{l s='Nous vous accompagnons pour toutes vos questions au 02 99 68 89 12.'}</P>

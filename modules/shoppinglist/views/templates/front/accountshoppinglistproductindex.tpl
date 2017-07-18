@@ -68,12 +68,11 @@
 <ul class="action">
     {if $shoppingListProducts}
         <li>
-			<!-- Appel de la méthode ShoppingListAccountShoppingListProductModuleFrontController.accountshoppinglistproduct -->
-<!--            <a class="add-all btn btn-default button button-medium" href="{$link->getModuleLink('shoppinglist', 'accountshoppinglistproduct', ['action' => 'addAllToCart', 'id_shopping_list' => $shoppingListObj->id_shopping_list])}" onclick="$(this).closest('form').submit()">
--->
-            <a class="add-all btn btn-default button button-medium" onclick="$(this).closest('form').submit()">
+			<!--Affichage de toutes les lignes avant de valider le forumlaires -->
+            <a class="add-all btn btn-default button button-medium" 
+		   onclick="$('#shopping-list').DataTable().search('').draw();$(this).closest('form').submit()">
                 <span>
-                    <img class="icon" src="{$base_dir}modules/shoppinglist/img/add-product.png" alt="{l s='Préparer la commande' mod='shoppinglist'}">{l s='Préparer la commande'}<i class="icon-shopping-cart right"></i>
+                    <img class="icon" src="{$base_dir}modules/shoppinglist/img/add-product.png" alt="{l s='Préparer la commande' mod='shoppinglist'}">{l s='Visualiser la commande'}<i class="icon-shopping-cart right"></i>
                 </span>
             </a>
         </li>

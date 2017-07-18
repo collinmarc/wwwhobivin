@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2016 PrestaShop
+ * 2007-2015 PrestaShop
  *
  * NOTICE OF LICENSE
  *
@@ -19,12 +19,12 @@
  * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2016 PrestaShop SA
+ * @copyright 2007-2015 PrestaShop SA
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
- // Modifié par Vinicom le 04/02/2016
- // VNC : 04/02/2016 : définition d'une table des items  
+ // ModifiÃ© par Vinicom le 04/02/2016
+ // VNC : 04/02/2016 : dÃ©finition d'une table des items  
 
 if (!defined('_CAN_LOAD_FILES_'))
 	exit;
@@ -50,7 +50,7 @@ class MailAlerts extends Module
 	{
 		$this->name = 'mailalerts';
 		$this->tab = 'administration';
-		$this->version = '3.6.1';
+		$this->version = '3.6.0';
 		$this->author = 'PrestaShop';
 		$this->need_instance = 0;
 
@@ -277,7 +277,7 @@ class MailAlerts extends Module
 			$message = $this->l('No message');
 
 		$items_table = '';
-		// VNC : 04/02/2016 : Déclaration de la table des produits façon Vinicom
+		// VNC : 04/02/2016 : DÃ©claration de la table des produits faÃ§on Vinicom
 		$items_tableVnc = '';
 
 		$products = $params['order']->getProducts();
@@ -323,7 +323,7 @@ class MailAlerts extends Module
 						.Tools::displayPrice(($unit_price * $product['product_quantity']), $currency, false)
 					.'</td>
 				</tr>';
-			//VNC : 04/02/2016 :  initiaisation de la table des items façon vinicom
+			//VNC : 04/02/2016 :  initiaisation de la table des items faÃ§on vinicom
 			$items_tableVnc .=
 				'[ligneprestashop]
 					[reference]'.$product['product_reference'].'[/reference]
@@ -354,13 +354,15 @@ class MailAlerts extends Module
 
 		// Filling-in vars for email
 		//VNC : 04/02/2016 : Ajout de {order_id}, {customer_id}, {itemsVnc}
+		//VNC : 17/07/2017 : Ajout de {company}
 		$template_vars = array(
 			'{order_id}' => $order->id,
 			'{customer_id}' => $customer->id,
 			'{firstname}' => $customer->firstname,
 			'{lastname}' => $customer->lastname,
 			'{email}' => $customer->email,
-			'{delivery_block_txt}' => MailAlert::getFormatedAddress($delivery, "\n"),
+		    '{company}' => $customer->company,
+		    '{delivery_block_txt}' => MailAlert::getFormatedAddress($delivery, "\n"),
 			'{invoice_block_txt}' => MailAlert::getFormatedAddress($invoice, "\n"),
 			'{delivery_block_html}' => MailAlert::getFormatedAddress(
 				$delivery, '<br />', array(

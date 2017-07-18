@@ -2686,14 +2686,15 @@ class AdminControllerCore extends Controller
             $this->context->employee->logout();
         }
 
-        if (isset(Context::getContext()->cookie->last_activity)) {
+        // VNC : Pas de déconnexion de l'employé
+/*        if (isset(Context::getContext()->cookie->last_activity)) {
             if ($this->context->cookie->last_activity + 900 < time()) {
                 $this->context->employee->logout();
             } else {
                 $this->context->cookie->last_activity = time();
             }
         }
-
+*/
         if ($this->controller_name != 'AdminLogin' && (!isset($this->context->employee) || !$this->context->employee->isLoggedBack())) {
             if (isset($this->context->employee)) {
                 $this->context->employee->logout();
