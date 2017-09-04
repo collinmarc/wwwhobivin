@@ -1,5 +1,8 @@
 <?php
 //define('_DB_SERVER_', 'hobivinjpresta16.mysql.db');
+//define('_DB_NAME_', 'hobivinjpresta16');
+//define('_DB_USER_', 'hobivinjpresta16');
+//define('_DB_PASSWD_', 'SuMfzPVP27VU');
 define('_DB_SERVER_', 'localhost');
 define('_DB_NAME_', 'hobivinjpresta16');
 define('_DB_USER_', 'root');
