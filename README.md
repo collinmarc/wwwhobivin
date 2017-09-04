@@ -1,6 +1,10 @@
 # vinicom.wine
 site internet Vinicom.wine
 
+#783 : Les pictogrammes n'appraissent plus sur le site
+#782 : L'accès à l'espace 'Visiteur' demande une authentification
+#784 : suppression de la partie suivi de commande dans l'historique des commandes
+
 #V20170718
 #769 : Modif du mail new_oder : mettre la société dans livraison company
 #0000767: Déconnexion intempestive du back-office

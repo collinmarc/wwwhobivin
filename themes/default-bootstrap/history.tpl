@@ -53,9 +53,12 @@
 							{if isset($order.invoice) && $order.invoice && isset($order.virtual) && $order.virtual}
 								<img class="icon" src="{$img_dir}icon/download_product.gif"	alt="{l s='Products to download'}" title="{l s='Products to download'}" />
 							{/if}
+							<!--
 							<a class="color-myaccount" href="javascript:showOrder(1, {$order.id_order|intval}, '{$link->getPageLink('order-detail', true)|escape:'html':'UTF-8'}');">
 								{Order::getUniqReferenceOf($order.id_order)}
 							</a>
+							-->
+								{Order::getUniqReferenceOf($order.id_order)}
 						</td>
 						<td data-value="{$order.date_add|regex_replace:"/[\-\:\ ]/":""}" class="history_date bold">
 							{dateFormat date=$order.date_add full=0}
@@ -66,11 +69,13 @@
 							</span>
 						</td>
 						<td class="history_detail">
+						<!--
 							<a class="btn btn-default button button-small" href="javascript:showOrder(1, {$order.id_order|intval}, '{$link->getPageLink('order-detail', true)|escape:'html':'UTF-8'}');">
 								<span>
 									{l s='Details'}<i class="icon-chevron-right right"></i>
 								</span>
 							</a>
+						-->
 							{if isset($opc) && $opc}
 								<a class="link-button" href="{$link->getPageLink('order-opc', true, NULL, "submitReorder&id_order={$order.id_order|intval}")|escape:'html':'UTF-8'}" title="{l s='Reorder'}">
 							{else}

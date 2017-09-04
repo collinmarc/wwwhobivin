@@ -28,7 +28,13 @@ class IndexControllerCore extends FrontController
 {
     public $php_self = 'index';
 
-    /**
+    public function init()
+    {
+		$this->auth = false; // Annulation de l'obligation d'authentification #782
+		parent::init();
+	 }
+
+	 /**
      * Assign template vars related to page content
      * @see FrontController::initContent()
      */
