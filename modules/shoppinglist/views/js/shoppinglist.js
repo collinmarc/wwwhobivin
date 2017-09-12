@@ -15,39 +15,65 @@ $(document).ready(function() {
         $(this).find('ul').slideUp();
     })
     
-//Click sur les boutons AddShopipingList 
-$(".add-shopping-list").click(function() {
+//Click sur les boutons AddOrRemoveShoppingList 
+$(".addOrRemove-shopping-list").click(function() {
+		// Récupération des données
+        $id = $(this).attr('id');
+		$id_product = $id.split("_")[1];
+		$action = $id.split("_")[2];
         $href = $(this).attr('data-href');
-        $attribute = $('#idCombination').val();
-        $product = $('#product_page_product_id').val();
-        $title = $('#title-product').html();
-        if($("#product_reference").length == 1) {
-            $reference = " (" + $("#product_reference").text() + ")";
-        }
-        else {
-            $reference = "";
-        }
+        $id_shoppinglist = $('#id_shoppinglist_'+$id_product).val();
+        $token = $('#token_'+$id_product).val();
+        $reference = $('#product_reference_'+$id_product).val();
+        $attribute = $('#id_product_attribute_'+$id_product).val();
+        $title = $('#product_title_'+$id_product).val();
+
+			if ($action == "add")
+			{
+				$('#shoppinglist_'+$id_product+'_add').slideToggle();
+			}
+			if ($action == "remove")
+			{
+				$('#shoppinglist_'+$id_product+'_remove').slideToggle();
+			}
+//		$("html,body").css("cursor", "wait");
+//				$('#addShoppinglist_'+$id_product).slideToggle();
+		//Appel de l'url passé dans data-href
         $.ajax({
             url: $href,
             type: 'POST',
             dataType: 'json',
             data: {
-                id_product: $product,
+                id_product: $id_product,
                 id_product_attribute: $attribute,
                 title: $title + $reference,
-                ajax: true,
-                action: 'add-shopping-list'
+                idShoppingList: $id_shoppinglist,
+                token: $token,
+                ajax: true
             },
-            success: function(msg){ 
-				$('#addShoppinglist').slideToggle();
-				$('#removeShoppinglist').slideToggle();
-				$('#iconInShoppingList').slideToggle();
+            success: function(msg){
+			if ($action == "add")
+			{
+				$('#shoppinglist_'+$id_product+'_remove').slideToggle();
+			}
+			if ($action == "remove")
+			{
+				$('#shoppinglist_'+$id_product+'_add').slideToggle();
+			}
+				$('#iconInShoppingList_'+$id_product).slideToggle();
                 alert(msg.result);
             },
             error: function(msg){
                 alert(msg.result);
             },
         });
+
+		/*
+		
+				$('#addShoppinglist_'+$id_product).slideToggle();
+				$('#removeShoppinglist_'+$id_product).slideToggle();
+				$('#iconInShoppingList_'+$id_product).slideToggle();
+		*/
     }); // add-shopping-list.click
 	
 });

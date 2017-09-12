@@ -53,9 +53,9 @@
 </div>-->
 
 {if count($order_history)}
-<h1 class="page-heading">SUIVI DE COMMANDE</h1>
+<h1 class="page-heading">DETAIL DE COMMANDE</h1>
 <div class="table_block">
-	<table class="detail_step_by_step table table-bordered">
+	<table class="detail_step_by_step table table-bordered hidden">
 		<thead>
 			<tr>
 				<th class="first_item">{l s='Date'}</th>
@@ -366,7 +366,7 @@
 {if !$is_guest}</form>{/if}
 {assign var='carriers' value=$order->getShipping()}
 {if $carriers|count > 0 && isset($carriers.0.carrier_name) && $carriers.0.carrier_name}
-	<table class="table table-bordered footab">
+	<table class="table table-bordered footab hidden">
 		<thead>
 			<tr>
 				<th class="first_item">{l s='Date'}</th>
@@ -440,7 +440,7 @@
 		{l s='Message successfully sent'}
 	</p>
 	{/if}
-	<form action="{$link->getPageLink('order-detail', true)|escape:'html':'UTF-8'}" method="post" class="std" id="sendOrderMessage">
+	<form action="{$link->getPageLink('order-detail', true)|escape:'html':'UTF-8'}" method="post" class="std hidden" id="sendOrderMessage">
 		<h3 class="page-heading bottom-indent">{l s='Add a message'}</h3>
 		<p>{l s='If you would like to add a comment about your order, please write it in the field below.'}</p>
 		<p class="form-group">

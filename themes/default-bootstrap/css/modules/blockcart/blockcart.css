@@ -4,7 +4,7 @@
 #header .shopping_cart {
   position: relative;
   float: right;
-  padding-top: 50px; }
+  padding-top: 10px}
   #header .shopping_cart > a:first-child:after {
     content: "\f0d7";
     font-family: "FontAwesome";
@@ -18,7 +18,7 @@
     padding: 4px 0px 2px 0px; }
 
 .shopping_cart {
-  width: 270px; }
+  width: 270px; height: 50px; margin-top:50px;background-color=red}
   @media (max-width: 480px) {
     .shopping_cart {
       padding-top: 20px; } }

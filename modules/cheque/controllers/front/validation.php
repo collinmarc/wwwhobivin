@@ -27,6 +27,8 @@
 /**
  * @since 1.5.0
  */
+include_once ("modules/shoppinglist/shoppinglist.php");
+
 class ChequeValidationModuleFrontController extends ModuleFrontController
 {
 	public function postProcess()
@@ -62,6 +64,11 @@ class ChequeValidationModuleFrontController extends ModuleFrontController
 			'{cheque_address_html}' => str_replace("\n", '<br />', Configuration::get('CHEQUE_ADDRESS')));
 
 		$this->module->validateOrder((int)$cart->id, Configuration::get('PS_OS_CHEQUE'), $total, $this->module->displayName, NULL, $mailVars, (int)$currency->id, false, $customer->secure_key);
+		
+		// MAJ du la shoppingList du client
+		shoppingListObject::updateShoppingListCustomer($this->context->cookie->id_customer,$cart->getProducts());
+		// Supression des données de la shoppingList dans le cookie
+		$this->context->cookie->__unset('shoppingListProducts');
 		Tools::redirect('index.php?controller=order-confirmation&id_cart='.(int)$cart->id.'&id_module='.(int)$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
 	}
 }

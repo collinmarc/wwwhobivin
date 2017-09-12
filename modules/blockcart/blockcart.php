@@ -31,6 +31,7 @@ class BlockCart extends Module
 {
 	public function __construct()
 	{
+		PrestaShopLogger::addLog("BlockCart.__construct");
 		$this->name = 'blockcart';
 		$this->tab = 'front_office_features';
 		$this->version = '1.6.0';
@@ -47,6 +48,8 @@ class BlockCart extends Module
 
 	public function assignContentVars($params)
 	{
+	
+		PrestaShopLogger::addLog("BlockCart.assignContentVars");
 		global $errors;
 
 		// Set currency
@@ -159,6 +162,18 @@ class BlockCart extends Module
 			$this->smarty->assign('errors', $errors);
 		if (isset($this->context->cookie->ajax_blockcart_display))
 			$this->smarty->assign('colapseExpandStatus', $this->context->cookie->ajax_blockcart_display);
+			
+		$shoppingListObj = new ShoppingListObject();
+        $tabshoppingList = $shoppingListObj->getByIdCustomer($this->context->cookie->id_customer);
+		if (isset($tabshoppingList))
+		{
+			if (isset($tabshoppingList[0]))
+			{
+					// Passage de l'id Shopping List au template
+					$this->context->smarty->assign('id_shopping_list', $tabshoppingList[0]['id_shopping_list'] );
+			}
+		}
+ 	
 	}
 
 	public function getContent()

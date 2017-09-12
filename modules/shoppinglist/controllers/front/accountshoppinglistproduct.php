@@ -25,34 +25,31 @@ class ShoppingListAccountShoppingListProductModuleFrontController extends Module
 	public function initContent()
 	{
 		parent::initContent();
-        
+       // Récupération de l'action et aiguillage
         $action = Tools::getValue('action');
         switch($action) {
             case 'delete':  
             case 'deleteConfirm':   $this->deleteShoppingListProduct();            break;
             case 'addOneToCart':    $this->addOneToCart();                         break;
-            case 'addAllToCart':    $this->addAllToCart();                         break;
-            default:                $this->indexShoppingListProduct();             break;
+            case 'addAllToCart':    $this->addAllToCart();                         break; // => ajout dans le panier et affichage du panier
+            case 'gotoCatalog':    	$this->saveShoppingListAndGotoCatalog();       break; // => sauvegarde dans le cookie et retour au catalogue
+            default:                $this->indexShoppingListProduct();             break; // Affichage de la liste 
         }
 
 	}
 
 	/**
-	 * Index shopping list product
+	 * Affichgage de la Shopping List
 	 */
 	public function indexShoppingListProduct($idShoppingList = null)
 	{
         if($idShoppingList == null) {
             $idShoppingList = Tools::getValue('id_shopping_list');
         }
-
+	
         $shoppingListObj = ShoppingListObject::loadByIdAndCustomer($idShoppingList, $this->context->cookie->id_customer);
-		if ($shoppingListObj != null)
-		{
         $shoppingListProducts = $shoppingListObj->getAllProducts();
-		}
-		
-        
+        	
         $this->context->smarty->assign('messages', $this->messages);
         $this->context->smarty->assign('errors', $this->errors);
         $this->context->smarty->assign('shoppingListObj', $shoppingListObj);
@@ -60,9 +57,15 @@ class ShoppingListAccountShoppingListProductModuleFrontController extends Module
 		$this->context->smarty->assign('HOOK_LEFT_COLUMN', null); // Suppression de la colonne de gauche
 		$this->context->smarty->assign('HOOK_TOP', null); // Suppression du menu Haut
 		$this->addCSS(_MODULE_DIR_."shoppinglist/views/css/shoppinglist2.css"); 
+		// Récupération des Quantités sockées dans le cookie
+		if ($this->context->cookie->__isset('shoppingListProducts'))
+		{
+			$Quantities = json_decode($this->context->cookie->shoppingListProducts,true); // Decodage Json en tableau 
+			$this->context->smarty->assign('Quantities', $Quantities);
+		}
 
 		$this->setTemplate('accountshoppinglistproductindex.tpl');
-	}
+	}//indexShoppingListProduct
     
     /**
 	 * Delete shopping list product
@@ -133,9 +136,9 @@ class ShoppingListAccountShoppingListProductModuleFrontController extends Module
             $this->errors[] = $this->module->l('The product', 'accountshoppinglistproduct').' "'.$product['title'].'" '.$this->module->l('was not avalaible for order', 'accountshoppinglistproduct');
         }
         
-        elseif(!$productObj->checkQty(2)) {
-            $this->errors[] = $this->module->l('The product', 'accountshoppinglistproduct').' "'.$product['title'].'" '.$this->module->l('has no sufficient stock available', 'accountshoppinglistproduct');
-        }
+//        elseif(!$productObj->checkQty(2)) {
+//          $this->errors[] = $this->module->l('The product', 'accountshoppinglistproduct').' "'.$product['title'].'" '.$this->module->l('has no sufficient stock available', 'accountshoppinglistproduct');
+//        }
         else {
             $cartObj = new Cart($this->context->cookie->id_cart);
 			if ($cartObj->id == null)
@@ -163,38 +166,67 @@ class ShoppingListAccountShoppingListProductModuleFrontController extends Module
     }
     
     /**
+	 * Sauvegarde des Qtes Saisies dans la Shoppinglist er redirection vers le catalog
+	 */
+    public function saveShoppingListToCookie() {
+        $idShoppingList = Tools::getValue('id_shopping_list');
+        $shoppingListObj = ShoppingListObject::loadByIdAndCustomer($idShoppingList, $this->context->cookie->id_customer);
+		if ($shoppingListObj!=null)
+		{
+			$products = $shoppingListObj->getAllProducts(); // Récupération de tous les produits de la ShoppingList
+			$tabShoppingList['IdShoppingList'] = $idShoppingList; // Création du tableau
+			foreach($products as $product) {
+				// Pour Chaque produit (id) , récupération de la qte Saisie
+				$qte = Tools::getValue('qty_'.$product['id_product']);
+				if ($qte!='')
+				{
+					$tabShoppingList['Q'.$product['id_product']]=$qte; // Stockage de la Quantité dans le tableau
+				}
+			}//foreach
+
+			// Affection dans le cookie
+			$this->context->cookie->__set('shoppingListProducts' , json_encode($tabShoppingList));
+
+		}
+	}
+
+    /**
+	 * Sauvegarde des Qtes Saisies dans la Shoppinglist er redirection vers le catalog
+	 */
+    public function saveShoppingListAndGotoCatalog() {
+			$this->saveShoppingListToCookie(); 
+			Tools::redirect($this->context->link->getCategoryLink(12, true));
+	}//saveShoppingListAndGotoCatalog
+	
+	
+    /**
 	 * Adding all products to cart
+	 *    Sauvegarde de la shoppingList dans le cookie
+	 *	   Ajout des produit acheté dans le panier
+	 *		Redirectoin vers la confirtmation de commande
 	 */
     public function addAllToCart() {
+		$this->saveShoppingListToCookie(); 
         $idShoppingList = Tools::getValue('id_shopping_list');
         $shoppingListObj = ShoppingListObject::loadByIdAndCustomer($idShoppingList, $this->context->cookie->id_customer);
 		if ($shoppingListObj!=null)
 		{
 			// Récupération de la ShoppingList
 			$products = $shoppingListObj->getAllProducts();
-//			$logger = new FileLogger(0); //0 == debug level, logDebug() won’t work without this.
-//			$logger->setFilename(_PS_ROOT_DIR_."/log/debugaddAllToCart.log");
-//			$logger->logDebug("message 1");
-//			$logger->logDebug("message 2"); 
-//			$logger->logDebug(Tools::getAllValues());
 			foreach($products as $product) {
 				// Pour Chaque produit (id) , récupération de la qte Saisie
 				$qte = Tools::getValue('qty_'.$product['id_product']);
-//					$logger->logDebug('qty_'.$product['id_product']."=".$qte); 
 				if ($qte!='')
 				{
-					// Ajout dans le panier
 					$this->updateProductInCart($idShoppingList, $product['id_product'], $product['id_product_attribute'],$qte);
 				}
 			}//foreach
 
-			// Display the shoppingList
-//			$this->indexShoppingListProduct($idShoppingList);
-
-			// Display Cart
-			Tools::redirect("index.php?controller=order-opc");
 		}
-    }
+		// Display Cart
+		Tools::redirect("index.php?controller=order-opc");
+    }//addAllToCart
+
 
 	/**
 	* create a new Cart if it Doesn't Exist

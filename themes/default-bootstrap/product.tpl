@@ -157,8 +157,8 @@
 				<p class="online_only">{l s='Online only'}</p>
 			{/if}
 			<h1 itemprop="name">
-			{if ($isInShoppinList)} <i id = "iconInShoppingList" class="icon-heart left"></i>{/if}
-			{$product->name|escape:'html':'UTF-8'}
+				<i id = "iconInShoppingList_{$product->id}" class="icon-heart left" {if (!$isInShoppinList)}style="display: none;"{/if}></i>
+				{$product->name|escape:'html':'UTF-8'}
 			</h1>
 			
 			<B>{l s='Reference:'} : {$product->reference}</B><BR><BR>
@@ -428,7 +428,8 @@
 					</div> <!-- end product_attributes -->
 					<div class="box-cart-bottom">
 <!--						<div{if (!$allow_oosp && $product->quantity <= 0) || !$product->available_for_order || (isset($restricted_country_mode) && $restricted_country_mode) || $PS_CATALOG_MODE} class="unvisible"{/if}> -->
-						<div{if (!$allow_oosp && $product->quantity <= 0) || !$product->available_for_order || (isset($restricted_country_mode) && $restricted_country_mode) || $PS_CATALOG_MODE} class="unvisible"{/if}> 
+						<!-- Pas de bouton Commander !!!!!-->
+						<div class="unvisible"> 
 							<p id="add_to_cart" class="buttons_bottom_block no-print">
 								<button type="submit" name="Submit" class="exclusive" style="margin-left:auto;margin-right:auto; width:100%;">
 									<span >{if $content_only && (isset($product->customization_required) && $product->customization_required)}{l s='Customize'}{else}COMMANDER<br>LE PRODUIT{/if}</span>
@@ -437,10 +438,28 @@
 						</div>
 						{if isset($HOOK_PRODUCT_ACTIONS) && $HOOK_PRODUCT_ACTIONS}{$HOOK_PRODUCT_ACTIONS}{/if}
 					</div> <!-- end box-cart-bottom -->
+				</div> <!-- end box-info-product -->
+				<!-- data cachées (utilisées par le javascript shoppingList.js-->
+			</form>
+	<!-- shoppingList actions -->		
     {if $shoppingList}
+
 		<div class="shopping_list_block clear">
-			<!-- référencer -->
-			<a id="addShoppinglist" class="add-shopping-list btn btn-default button button-small " title="{l s='Remove to my shopping list' mod='shoppinglist'}" 
+			<p class="hidden">
+			<!-- pourquoi dans product_list.tpl on utilise des . a la pace des -> ????-->
+											<input type="hidden" id="id_shoppinglist_{$product->id}"  value="{$shoppingList[0].id_shopping_list}" />
+											<input type="hidden" id="token_{$product->id}" value="{$static_token}" />
+											<input type="hidden" id="id_product_{$product->id}" value="{$product->id|intval}" />
+											<input type="hidden" id="id_product_attribute_{$product->id}"  value="" />
+											<input type="hidden" id="product_reference_{$product->id}"  value="{$product->reference}" />
+											<input type="hidden" id="product_title_{$product->id}"  value="{$product->name}" />
+								
+
+			
+			</p>
+
+										<!-- référencer -->
+			<a id="shoppinglist_{$product->id}_add" class="addOrRemove-shopping-list btn btn-default button button-small " title="{l s='Remove to my shopping list' mod='shoppinglist'}" 
 			data-href="{$link->getModuleLink('shoppinglist', 'ajaxproductshoppinglist', ['id_shopping_list' => $shoppingList[0].id_shopping_list, 'static_token' => $static_token])}"
 			{if ($isInShoppinList)} style="display: none;"{/if}
 			>
@@ -448,7 +467,7 @@
 					{l s='Référencer le produit' mod='shoppinglist'}
 			</a>
 			<!-- Déréférencer -->
-			<a id="removeShoppinglist" class="add-shopping-list btn btn-default button button-small {if ($isInShoppinList)} hidden{/if}>" title="{l s='Remove to my shopping list' mod='shoppinglist'}" 
+			<a id="shoppinglist_{$product->id}_remove" class="addOrRemove-shopping-list btn btn-default button button-small {if ($isInShoppinList)} hidden{/if}>" title="{l s='Remove to my shopping list' mod='shoppinglist'}" 
 			data-href="{$link->getModuleLink('shoppinglist', 'ajaxRemoveproductshoppinglist', ['id_shopping_list' => $shoppingList[0].id_shopping_list, 'static_token' => $static_token])}" 
 			{if (!$isInShoppinList)} style="display: none;"{/if}
 			>
@@ -458,8 +477,6 @@
 			</a>
 		</div>
     {/if}
-				</div> <!-- end box-info-product -->
-			</form>
 			{/if}
 		</div> <!-- end pb-right-column-->
 	</div> <!-- end primary_block -->

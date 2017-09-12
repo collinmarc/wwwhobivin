@@ -113,12 +113,15 @@
 				</div>
 				<div class="right-block">
 					<h5 itemprop="name">
+						
 						{if isset($product.pack_quantity) && $product.pack_quantity}{$product.pack_quantity|intval|cat:' x '}{/if}
 						<a class="product-name" href="{$product.link|escape:'html':'UTF-8'}" title="{$product.name|escape:'html':'UTF-8'}" itemprop="url" >
+						<i id = "iconInShoppingList_{$product.id_product}" class="icon-heart left" {if (!$product.isInShoppinList)}style="display: none;"{/if}></i>
+						
 							{$product.reference}<BR>
 							{$product.name|escape:'html':'UTF-8'}
 						</a>
-				
+
 					{if isset($product.features)}
 						<div >
 							{foreach from=$product.features item=feature}
@@ -177,6 +180,36 @@
 						<a class="button lnk_view btn btn-default" href="{$product.link|escape:'html':'UTF-8'}" title="{l s='View'}">
 							<span>{if (isset($product.customization_required) && $product.customization_required)}{l s='Customize'}{else}{l s='More'}{/if}</span>
 						</a>
+						<div class="shopping_list_block clear">
+						<!-- data cachées (utilisées par le javascript shoppingList.js-->
+										<p class="hidden">
+											<input type="hidden" id="id_shoppinglist_{$product.id_product}"  value="{$idShoppingList}" />
+											<input type="hidden" id="token_{$product.id_product}" value="{$static_token}" />
+											<input type="hidden" id="id_product_{$product.id_product}" value="{$product->id|intval}" />
+											<input type="hidden" id="id_product_attribute_{$product.id_product}"  value="" />
+											<input type="hidden" id="product_reference_{$product.id_product}"  value="{$product.reference}" />
+											<input type="hidden" id="product_title_{$product.id_product}"  value="{$product.name}" />
+										</p>
+
+							<!-- référencer -->
+							<a id="shoppinglist_{$product.id_product}_add" class="addOrRemove-shopping-list btn btn-default button button-small" title="{l s='Ajouter à ma commande pré-établie'}"
+							data-href="{$link->getModuleLink('shoppinglist', 'ajaxproductshoppinglist', ['id_shopping_list' => $idShoppingList, 'static_token' => $static_token, 'id_product'=>$product.id_product, 'id_product_attribute'=>'', 'title'=> $product.name]) }" 
+							{if ($product.isInShoppinList)} style="display: none;"{/if}
+							>
+									<i class="icon-heart left"></i>
+									{l s='Référencer le produit' mod='shoppinglist'}
+							</a>
+							<!-- Déréférencer -->
+							<a id="shoppinglist_{$product.id_product}_remove" class="addOrRemove-shopping-list btn btn-default button button-small" title="{l s='Retirer de ma commande pré-établie'}" 
+							data-href="{$link->getModuleLink('shoppinglist', 'ajaxRemoveproductshoppinglist', ['id_shopping_list' => $idShoppingList, 'static_token' => $static_token, 'id_product'=>$product.id_product, 'id_product_attribute'=>'', 'title'=> $product.name]) }" 
+							{if (!$product.isInShoppinList)} style="display: none;"{/if}
+							>
+							
+									<!--<i class="icon-shopping-cart left"></i>-->
+									{l s='Déréférencer le produit' mod='shoppinglist'}
+							</a>
+						</div>
+
 					</div>
 					{if isset($product.color_list)}
 						<div class="color-list-container">{$product.color_list}</div>

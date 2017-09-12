@@ -2,7 +2,7 @@
 {**
 * AccountShoppingListProductIndex Template
 * 
-* @author Olivier Michaud
+* @author Marc Collin
 * @copyright  Olivier Michaud
 * @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *}
@@ -15,16 +15,24 @@
 
 {if $shoppingListProducts}
 
-<!--
-<div id="spinner" style="z-index:999; position:absolute; top:0; bottom:0; left:0; right:0; margin:auto; display:none; width:400px;  height:130px; background-color:#A71E4C; color:#FFF; text-align: center; padding-top:30px" ><h2><i class="icon-spinner icon-spin icon-large"></i> Ajout au panier</h2></div>
--->
 
     <script type="text/javascript" src="//cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css">
-	
-<Form id="ShoppingList" method="post" action="{$link->getModuleLink('shoppinglist', 'accountshoppinglistproduct', ['action' => 'addAllToCart', 'id_shopping_list' => $shoppingListObj->id_shopping_list])}"> 
+	{* fonction qui permet de modifider l'action à prendre en compte par le controleur *}
+	<script type="text/javascript">
+		function changeAction(value){
+		document.getElementsByName("action")[0].value= value;
+		}
+	</script>
 
-    <!--<table id="shopping-list" class="std table table-bordered footab footable-loaded footable tablet breakpoint">-->
+<Form id="ShoppingList" method="post" action="{$link->getModuleLink('shoppinglist', 'accountshoppinglistproduct')}"> 
+
+	{* Données cachées *}
+	<P class = "hidden">
+		<input  type="text" name="action" id="action" value="addAllToCart" />
+		<!-- <input type="hidden" name="action" value="gotoCatalog" /> -->
+		<input  name="id_shopping_list" value="{$shoppingListObj->id_shopping_list}" />
+  </p>
     <table id="shopping-list" class="table tableDnD">
         <thead>
             <tr>
@@ -39,21 +47,26 @@
             </tr>
         </thead>
         <tbody>
-            {foreach from=$shoppingListProducts item=itemList}
+            {foreach from=$shoppingListProducts item=product}
                 <tr>
-                    <!--<td>{$itemList.id_product}</td>-->
-                    <!--<td>{$itemList.id_product_attribute}</td>-->
-                    <td>{$itemList.reference}</td>
-                    <td >{$itemList.designation}</td>
-                    <td>{$itemList.couleur}</td>
-                    <td>{$itemList.contenant}</td>
-                    <td>{$itemList.millesime}</td>
-                    <td>{$itemList.conditionnement}</td>
-                    <td>{$itemList.quantity}</td>
+                    <!--<td>{$product.id_product}</td>-->
+                    <!--<td>{$product.id_product_attribute}</td>-->
+                    <td>{$product.reference}</td>
+                    <td>{$product.designation}</td>
+                    <td>{$product.couleur}</td>
+                    <td>{$product.contenant}</td>
+                    <td>{$product.millesime}</td>
+                    <td>{$product.conditionnement}</td>
+                    <td>{$product.quantity}</td>
                     <td align="center">
-                        
-                        
-                        <input type="text" name="qty_{$itemList.id_product}" id="qty_{$itemList.id_product}" value="" style="width:50px;text-align:center">
+                        {* création de la clé *}
+                        {assign var='Key' value=$product.id_product|string_format:"Q%d"}
+						{if isset($Quantities[$Key])}
+							{* affectation de la quantité *}
+							<input type="text" name="qty_{$product.id_product}" id="qty_{$product.id_product}" value='{$Quantities[$Key]}' style="width:50px;text-align:center">
+						{else}
+							<input type="text" name="qty_{$product.id_product}" id="qty_{$product.id_product}" value='' style="width:50px;text-align:center">
+						{/if}
 
                         
                     </td>
@@ -68,19 +81,21 @@
 <ul class="action">
     {if $shoppingListProducts}
         <li>
-			<!--Affichage de toutes les lignes avant de valider le forumlaires -->
+			<!--Affichage de toutes les lignes avant de valider le forumlaires avec l'action addAllToCart-->
             <a class="add-all btn btn-default button button-medium" 
-		   onclick="$('#shopping-list').DataTable().search('').draw();$(this).closest('form').submit()">
+		   onclick="$('#shopping-list').DataTable().search('').draw();changeAction('addAllToCart');$(this).closest('form').submit()">
                 <span>
-                    <img class="icon" src="{$base_dir}modules/shoppinglist/img/add-product.png" alt="{l s='Préparer la commande' mod='shoppinglist'}">{l s='Visualiser la commande'}<i class="icon-shopping-cart right"></i>
+                    <img class="icon" src="{$base_dir}modules/shoppinglist/img/add-product.png" alt="{l s='Visualiser la commande' mod='shoppinglist'}">{l s='Visualiser la commande'}<i class="icon-shopping-cart right"></i>
                 </span>
             </a>
         </li>
     {/if}
+			<!--Affichage de toutes les lignes avant de valider le forumlaires avec l'action gotocatalog-->
     <li>
-       <a class="back-shopping-list btn btn-default button button-medium exclusive" href="{$link->getPageLink('my-account', true)|escape:'html':'UTF-8'}">
+       <a class="back-shopping-list btn btn-default button button-medium exclusive" 
+	   onclick="$('#shopping-list').DataTable().search('').draw();changeAction('gotoCatalog'); $(this).closest('form').submit()" >
             <span>
-                {l s='Retour à mon compte'}<i class="icon-chevron-left right"></i>
+                {l s='Accès au catalogue'}<i class="icon-chevron-left right"></i>
             </span>
         </a>
      </li>
@@ -93,38 +108,6 @@ attention avec les {} utilisés par Smarty et Javascript
 https://datatables.net/forums/discussion/11939/resolved-datatables-smarty
 -->
 <script type="text/javascript">
-    ajaxCart.refresh(); 
-
-    $('.quickAddToBasket').click(function() {
-        var id_product = $(this).attr("id");
-        var id_product_attribute = $(this).attr("data-attribute");
-        var qty = $('#qty_'+id_product).val();
-        //alert ('quickAdd : id_product : '+id_product+' qty : '+qty);
-        //document.location.href="index.php?action=addOneToCart&add=1&qty="+qty+"&id_shopping_list={$itemList.id_shopping_list}&id_product="+id_product+"&id_product_attribute="+id_product_attribute+"&fc=module&module=shoppinglist&controller=accountshoppinglistproduct";
-
-        //$(this).addClass("");
-        $('#spinner').show();
-
-        $.ajax({
-            url: 'index.php',
-            type: 'GET',
-            data: "action=addOneToCart&add=1&qty="+qty+"&id_shopping_list={$itemList.id_shopping_list}&id_product="+id_product+"&id_product_attribute="+id_product_attribute+"&fc=module&module=shoppinglist&controller=accountshoppinglistproduct",   
-            success: function(json) {
-                ajaxCart.refresh(); 
-            }
-        }).done(function(){
-            $('#spinner').hide();
-        });
-
-
-
-    } );
-
-    /*
-<a class="quickAddToBasket btn btn-default button button-small" href="{$link->getModuleLink('shoppinglist', 'accountshoppinglistproduct', ['action' => 'addOneToCart', 'add' => '1', 'id_shopping_list' => $itemList.id_shopping_list, 'id_product' => $itemList.id_product, 'id_product_attribute' => $itemList.id_product_attribute])}">
-
-<a class="quickAddToBasket btn btn-default button button-small" href="http://vinicom.wine/index.php?action=addOneToCart&add=1&id_shopping_list=28&id_product=508&id_product_attribute=682&fc=module&module=shoppinglist&controller=accountshoppinglistproduct">
-    */
 
     var table = $('#shopping-list').DataTable( {
 	"autowidth":true,

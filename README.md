@@ -1,6 +1,12 @@
-# vinicom.wine
-site internet Vinicom.wine
+# Hobivin.fr
+site internet www.hobivin.fr
 
+#V20170912
+#764 : 	Ajout des boutons "Reférencer", "Déréférencer" sur la iste des produits
+#785 : Lien vers le catalogue depuis la précommande 
+#786 : Suivi de commande : Affichage du détail  
+
+#V20170825
 #783 : Les pictogrammes n'appraissent plus sur le site
 #782 : L'accès à l'espace 'Visiteur' demande une authentification
 #784 : suppression de la partie suivi de commande dans l'historique des commandes

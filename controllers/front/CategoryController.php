@@ -64,6 +64,7 @@ class CategoryControllerCore extends FrontController
         }
 
         $this->addJS(_THEME_JS_DIR_.'category.js');
+        $this->addJS(_THEME_JS_DIR_.'../../../modules/shoppinlist/modules/views/js/shoppinglist.js');
     }
 
     /**
@@ -237,13 +238,29 @@ class CategoryControllerCore extends FrontController
             'cat_products' => &$this->cat_products,
         ));
 
+		$shoppingListObj = new ShoppingListObject();
+		$shoppingListList = $shoppingListObj->getByIdCustomer($this->context->cookie->id_customer);
+
         foreach ($this->cat_products as &$product) {
             if (isset($product['id_product_attribute']) && $product['id_product_attribute'] && isset($product['product_attribute_minimal_quantity'])) {
                 $product['minimal_quantity'] = $product['product_attribute_minimal_quantity'];
             }
+			
+			$product['isInShoppinList'] = false;
+			if (count($shoppingListList)>0 )
+			{
+				$shoppingListObj = new ShoppingListObject($shoppingListList[0]['id_shopping_list']);
+				if ($shoppingListObj->isproductinShoppingList($product['id_product']))
+				{
+					$product['isInShoppinList'] = true;
+				}
+			}
+
+			
         }
         
         $this->context->smarty->assign('nb_products', $this->nbProducts);
+        $this->context->smarty->assign('idShoppingList', $shoppingListList[0]['id_shopping_list']); // Id shoppingList du client
     }
 
     /**
