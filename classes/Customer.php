@@ -24,6 +24,8 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+include_once(_PS_MODULE_DIR_.'shoppinglist/classes/ShoppingListObject.php');
+
 class CustomerCore extends ObjectModel
 {
     public $id;
@@ -228,6 +230,24 @@ class CustomerCore extends ObjectModel
         }
         $success = parent::add($autodate, $null_values);
         $this->updateGroup($this->groupBox);
+		//create a ShoppingList
+		$shoppingListObj = new ShoppingListObject();
+        
+            $shoppingListObj->id_customer = $this->id_customer;
+            $shoppingListObj->title = 'PRECMD';
+            $shoppingListObj->status = 1;
+            $date = new \DateTime();
+            $shoppingListObj->date_add = $date;
+            $shoppingListObj->date_upd = $date;
+            
+            try {
+                $shoppingListObj->add();
+            }
+            catch (Exception $e) {
+                $this->errors[] = $this->module->l('Error! Perhaps this Shopping list already exist', 'accountshoppinglist');
+            }
+            
+
         return $success;
     }
 
@@ -298,7 +318,7 @@ class CustomerCore extends ObjectModel
      */
     public static function getCustomers()
     {
-        $sql = 'SELECT `id_customer`, `email`, `firstname`, `lastname`
+        $sql = 'SELECT `id_customer`, `email`, `firstname`, `lastname`, `company`
 				FROM `'._DB_PREFIX_.'customer`
 				WHERE 1 '.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).'
 				ORDER BY `id_customer` ASC';
@@ -318,14 +338,9 @@ class CustomerCore extends ObjectModel
             die(Tools::displayError());
         }
 
-        $result = Db::getInstance()->getRow('
-		SELECT *
-		FROM `'._DB_PREFIX_.'customer`
-		WHERE `email` = \''.pSQL($email).'\'
-		'.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).'
-		'.(isset($passwd) ? 'AND `passwd` = \''.pSQL(Tools::encrypt($passwd)).'\'' : '').'
-		AND `deleted` = 0
-		'.($ignore_guest ? ' AND `is_guest` = 0' : ''));
+		$sql = 'SELECT * FROM `'._DB_PREFIX_.'customer` WHERE `email` = \''.pSQL($email).'\''.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).' '.(isset($passwd) ? 'AND `passwd` = \''.pSQL(Tools::encrypt($passwd)).'\'' : '').' AND `deleted` = 0 '.($ignore_guest ? ' AND `is_guest` = 0' : '');
+
+        $result = Db::getInstance()->getRow($sql);
 
         if (!$result) {
             return false;
@@ -336,7 +351,7 @@ class CustomerCore extends ObjectModel
                 $this->{$key} = $value;
             }
         }
-        return $this;
+       return $this;
     }
 
     /**
@@ -822,6 +837,8 @@ class CustomerCore extends ObjectModel
 
         /* Customer is valid only if it can be load and if object password is the same as database one */
         return ($this->logged == 1 && $this->id && Validate::isUnsignedId($this->id) && Customer::checkPassword($this->id, $this->passwd));
+        //return ($this->logged == 1);
+        //return true;
     }
 
     /**
