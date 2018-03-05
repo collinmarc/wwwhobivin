@@ -2,7 +2,7 @@
 [cmdprestashop]
 [id]{order_id}[/id]
 [name]{order_name}[/name]
-[origine]VINICOM[/origine]
+[origine]HOBIVIN[/origine]
 [customer_id]{customer_id}[/customer_id]
 		[company]{company}[/company]
 		[livraison_company]{delivery_company}[/livraison_company]

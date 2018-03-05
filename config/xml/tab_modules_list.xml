@@ -261,7 +261,7 @@
 </tab>
 <tab class_name="AdminPayment" display_type="default_list">
 <module name="secureframe" position="1"/>
-<module name="paypalmx" position="2"/>
+<module name="paypal" position="2"/>
 <module name="mercadopagobr" position="3"/>
 <module name="payulatam" position="4"/>
 <module name="dotpay" position="5"/>

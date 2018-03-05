@@ -1,6 +1,10 @@
 # Hobivin.fr
 site internet www.hobivin.fr
 
+#V20180305
+#832 : Validation de précommande : certains produit sont manquants => MAJ de la table ShoppingListProduct 
+#831 : Erreurs en import de tarifs : (Pblm cohérence ce fichier)
+
 #V20170912
 #764 : 	Ajout des boutons "Reférencer", "Déréférencer" sur la iste des produits
 #785 : Lien vers le catalogue depuis la précommande 
