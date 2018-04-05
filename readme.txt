@@ -1,4 +1,8 @@
-﻿Version 20170314
+﻿Version 20180405
+================
+#834 : Modififcation de la pâge d'accueil de hobivin.fr
+
+Version 20170314
 ================
 #740 : Modififcation des Qte dans le panier
 #739 : Suppression du dernier champ sur la visualisation des produits sur le site
