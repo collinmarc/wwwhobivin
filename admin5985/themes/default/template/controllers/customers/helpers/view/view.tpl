@@ -178,6 +178,7 @@
 					{/if}
 				{/if}
 			</div>
+			
 			<div class="panel">
 				<div class="panel-heading">
 					<i class="icon-file"></i> {l s='Orders'} <span class="badge">{count($orders)}</span>
@@ -266,7 +267,7 @@
 				</p>
 				{/if}
 			</div>
-
+			<!--
 			<div class="panel">
 				<div class="panel-heading">
 					<i class="icon-shopping-cart"></i> {l s='Carts'} <span class="badge">{count($carts)}</span>
@@ -302,6 +303,8 @@
 				</p>
 				{/if}
 			</div>
+			-->
+			<!--
 			{if $products AND count($products)}
 			<div class="panel">
 				<div class="panel-heading">
@@ -331,6 +334,8 @@
 				</table>
 			</div>
 			{/if}
+			-->
+			<!--
 			{if count($interested)}
 			<div class="panel">
 				<div class="panel-heading">
@@ -354,13 +359,15 @@
 				</table>
 			</div>
 			{/if}
+			-->
 		</div>
 		{*right*}
 
 		<div class="col-lg-6">
 		{* display hook specified to this page : AdminCustomers *}
 		{hook h="displayAdminCustomers" id_customer=$customer->id|intval}
-			<div class="panel">
+		<!--
+		<div class="panel">
 				<div class="panel-heading">
 					<i class="icon-eye-close"></i> {l s='Add a private note'}
 				</div>
@@ -382,7 +389,8 @@
 					<span id="note_feedback"></span>
 				</form>
 			</div>
-
+		-->
+		<!--
 		<div class="panel">
 				<div class="panel-heading">
 					<i class="icon-envelope"></i> {l s='Messages'} <span class="badge">{count($messages)}</span>
@@ -412,6 +420,8 @@
 				</p>
 				{/if}
 			</div>
+			-->
+			<!--
 			<div class="panel">
 				<div class="panel-heading">
 					<i class="icon-ticket"></i> {l s='Vouchers'} <span class="badge">{count($discounts)}</span>
@@ -460,6 +470,8 @@
 				</p>
 				{/if}
 			</div>
+			-->
+			<!--
 
 			{if count($emails)}
 			<div class="panel">
@@ -488,7 +500,8 @@
 				</table>
 			</div>
 			{/if}
-
+			-->
+			<!--
 			{if count($connections)}
 			<div class="panel">
 				<div class="panel-heading">
@@ -518,7 +531,7 @@
 				</table>
 			</div>
 			{/if}
-
+			-->
 			<div class="panel">
 				<div class="panel-heading">
 					<i class="icon-group"></i>

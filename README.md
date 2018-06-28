@@ -1,6 +1,10 @@
 # Hobivin.fr
 site internet www.hobivin.fr
 
+#V20180628
+#839: Ajout des informations de contacts dans la fiche client. 
+#837: Erreur en création de clients sur les sites internet Hobivin et Vinicom 
+
 #V20180305
 #832 : Validation de précommande : certains produit sont manquants => MAJ de la table ShoppingListProduct 
 #831 : Erreurs en import de tarifs : (Pblm cohérence ce fichier)

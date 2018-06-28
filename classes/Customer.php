@@ -136,7 +136,16 @@ class CustomerCore extends ObjectModel
     public $id_guest;
 
     public $groupBox;
+	
+	public $address1;
+	public $address2;
+	public $postcode;
+	public $city;
+	public $phone;
+	public $phone_mobile;
 
+	
+	
     protected $webserviceParameters = array(
         'fields' => array(
             'id_default_group' => array('xlink_resource' => 'groups'),
@@ -229,11 +238,14 @@ class CustomerCore extends ObjectModel
             return false;
         }
         $success = parent::add($autodate, $null_values);
+		
         $this->updateGroup($this->groupBox);
-		//create a ShoppingList
+		//=========================================
+		// En cas d créatio de client => Création d'une shoppingList automatique
+		//=========================================
 		$shoppingListObj = new ShoppingListObject();
         
-            $shoppingListObj->id_customer = $this->id_customer;
+            $shoppingListObj->id_customer = $this->id;
             $shoppingListObj->title = 'PRECMD';
             $shoppingListObj->status = 1;
             $date = new \DateTime();
@@ -244,7 +256,29 @@ class CustomerCore extends ObjectModel
                 $shoppingListObj->add();
             }
             catch (Exception $e) {
-                $this->errors[] = $this->module->l('Error! Perhaps this Shopping list already exist', 'accountshoppinglist');
+    //            $this->errors[] = $this->module->l('Error! Perhaps this Shopping list already exist', 'accountshoppinglist');
+            }
+		//=========================================
+		// En cas d créatio de client => Création d'une adresse automatique
+		//=========================================
+			$Address = new Address();
+            $Address->id_customer = $this->id;
+			$Address->alias = "Principale";
+			$Address->firstname = $this->firstname;
+			$Address->lastname = $this->lastname;
+			$Address->address1 = $this->address1;
+			$Address->address2 = $this->address2;
+			$Address->postcode = $this->postcode;
+			$Address->city = $this->city;
+			$Address->phone = $this->phone;
+			$Address->phone_mobile = $this->phone_mobile;
+			$Address->id_country = Country::getByIso('FR');
+
+            try {
+                $Address->add(true,true);
+            }
+            catch (Exception $e) {
+                $this->errors[] = $this->l('Erreur en création adresse', 'Address');
             }
             
 

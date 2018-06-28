@@ -95,7 +95,7 @@ class AdminCustomersControllerCore extends AdminController
             ),
             'email' => array(
                 'title' => $this->l('Email address')
-            ),
+            )
         );
 
         if (Configuration::get('PS_B2B_ENABLE')) {
@@ -381,6 +381,55 @@ class AdminCustomersControllerCore extends AdminController
                     'col' => '4',
                     'hint' => $this->l('Invalid characters:').' 0-9!&lt;&gt;,;?=+()@#"°{}_$%:'
                 ),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Address'),
+					'name' => 'address1',
+					'required' => true
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Address').'2',
+					'name' => 'address2'
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Code postal'),
+					'name' => 'postcode',
+					'required' => true
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Ville'),
+					'name' => 'city',
+					'required' => true
+				),
+				array(
+					'type' => 'select',
+					'label' => $this->l('Country'),
+					'name' => 'id_country',
+					'required' => true,
+					'default_value' => (int)$this->context->country->id,
+					'options' => array(
+						'query' => Country::getCountries($this->context->language->id),
+						'id' => 'id_country',
+						'name' => 'name'
+						)
+				),
+				array(
+                    'type' => 'text',
+                    'label' => $this->l('Telephone'),
+                    'name' => 'phone',
+                    'required' => Configuration::get('PS_ONE_PHONE_AT_LEAST'),
+                    'hint' => Configuration::get('PS_ONE_PHONE_AT_LEAST') ? sprintf($this->l('Vous devez enregister au moins un numéro de téléphone.')) : ''
+				),
+				array(
+					'type' => 'text',
+					'label' => $this->l('Portable'),
+					'name' => 'phone_mobile',
+					'required' =>  Configuration::get('PS_ONE_PHONE_AT_LEAST'),
+					'hint' => Configuration::get('PS_ONE_PHONE_AT_LEAST') ? sprintf($this->l('Vous devez enregister au moins un numéro de téléphone.')) : ''
+				),
                 array(
                     'type' => 'text',
                     'prefix' => '<i class="icon-envelope-o"></i>',
@@ -582,6 +631,8 @@ class AdminCustomersControllerCore extends AdminController
                     'name' => 'name'
                 ),
             );
+
+
         }
 
         $this->fields_form['submit'] = array(
@@ -702,7 +753,22 @@ class AdminCustomersControllerCore extends AdminController
         $this->context->customer = $customer;
         $gender = new Gender($customer->id_gender, $this->context->language->id);
         $gender_image = $gender->getImage();
-
+        $customer_stats = null;
+		$count_better_customers = null;
+		$messages=null;
+		$orders=null;
+		$orders_ok=null;
+		$orders_ko=null;
+		$total_ok=null;
+		$products=null;
+		$carts=null;
+		$interested=null;
+		$emails=null;
+		$connections=null;
+		$referrers= null;
+		
+		
+/*
         $customer_stats = $customer->getStats();
         $sql = 'SELECT SUM(total_paid_real) FROM '._DB_PREFIX_.'orders WHERE id_customer = %d AND valid = 1';
         if ($total_customer = Db::getInstance()->getValue(sprintf($sql, $customer->id))) {
@@ -712,14 +778,16 @@ class AdminCustomersControllerCore extends AdminController
         } else {
             $count_better_customers = '-';
         }
-
+*/
+/*
         $orders = Order::getCustomerOrders($customer->id, true);
         $total_orders = count($orders);
         for ($i = 0; $i < $total_orders; $i++) {
             $orders[$i]['total_paid_real_not_formated'] = $orders[$i]['total_paid_real'];
             $orders[$i]['total_paid_real'] = Tools::displayPrice($orders[$i]['total_paid_real'], new Currency((int)$orders[$i]['id_currency']));
         }
-
+*/
+/*
         $messages = CustomerThread::getCustomerMessages((int)$customer->id);
 
         $total_messages = count($messages);
@@ -730,7 +798,7 @@ class AdminCustomersControllerCore extends AdminController
                 $messages[$i]['status'] = self::$meaning_status[$messages[$i]['status']];
             }
         }
-
+*/
         $groups = $customer->getGroups();
         $total_groups = count($groups);
         for ($i = 0; $i < $total_groups; $i++) {
@@ -739,7 +807,7 @@ class AdminCustomersControllerCore extends AdminController
             $groups[$i]['id_group'] = $group->id;
             $groups[$i]['name'] = $group->name[$this->default_form_language];
         }
-
+/*
         $total_ok = 0;
         $orders_ok = array();
         $orders_ko = array();
@@ -757,7 +825,8 @@ class AdminCustomersControllerCore extends AdminController
         }
 
         $products = $customer->getBoughtProducts();
-
+*/
+/*
         $carts = Cart::getCustomerCarts($customer->id);
         $total_carts = count($carts);
         for ($i = 0; $i < $total_carts; $i++) {
@@ -804,9 +873,11 @@ class AdminCustomersControllerCore extends AdminController
             $interested[$i]['id'] = (int)$product->id;
             $interested[$i]['name'] = Tools::htmlentitiesUTF8($product->name);
         }
-
+*/
+/*
         $emails = $customer->getLastEmails();
-
+*/
+/*
         $connections = $customer->getLastConnections();
         if (!is_array($connections)) {
             $connections = array();
@@ -821,7 +892,7 @@ class AdminCustomersControllerCore extends AdminController
         for ($i = 0; $i < $total_referrers; $i++) {
             $referrers[$i]['date_add'] = Tools::displayDate($referrers[$i]['date_add'], null, true);
         }
-
+*/
         $customerLanguage = new Language($customer->id_lang);
         $shop = new Shop($customer->id_shop);
         $this->tpl_view_vars = array(
@@ -899,12 +970,22 @@ class AdminCustomersControllerCore extends AdminController
 
     public function processAdd()
     {
+	
+
         if (Tools::getValue('submitFormAjax')) {
             $this->redirect_after = false;
         }
         // Check that the new email is not already in use
         $customer_email = strval(Tools::getValue('email'));
         $customer = new Customer();
+
+		$customer->address1 = Tools::getValue('address1');
+		$customer->address2 = Tools::getValue('address2');
+		$customer->postcode = Tools::getValue('postcode');
+		$customer->city = Tools::getValue('city');
+		$customer->phone = Tools::getValue('phone');
+		$customer->phone_mobile = Tools::getValue('phone_mobile');
+
         if (Validate::isEmail($customer_email)) {
             $customer->getByEmail($customer_email);
         }
