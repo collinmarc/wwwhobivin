@@ -1,6 +1,9 @@
 # Hobivin.fr
 site internet www.hobivin.fr
 
+#V20180702
+#850: Le bouton "Accès au catalogue" d'un nouveau client le fonctionne pas
+
 #V20180628
 #839: Ajout des informations de contacts dans la fiche client. 
 #837: Erreur en création de clients sur les sites internet Hobivin et Vinicom 

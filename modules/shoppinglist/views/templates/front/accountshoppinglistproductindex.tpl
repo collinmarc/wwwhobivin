@@ -13,7 +13,6 @@
 <!--<h1 class="page-heading">{l s='Ma commande pré-établie' mod='shoppinglist'}</h1>-->
 
 
-{if $shoppingListProducts}
 
 
     <script type="text/javascript" src="//cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
@@ -33,6 +32,7 @@
 		<!-- <input type="hidden" name="action" value="gotoCatalog" /> -->
 		<input  name="id_shopping_list" value="{$shoppingListObj->id_shopping_list}" />
   </p>
+{if $shoppingListProducts}
     <table id="shopping-list" class="table tableDnD">
         <thead>
             <tr>
