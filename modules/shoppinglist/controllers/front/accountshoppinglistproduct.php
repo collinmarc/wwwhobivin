@@ -146,7 +146,7 @@ class ShoppingListAccountShoppingListProductModuleFrontController extends Module
 				$this->createCart();
 				$cartObj = new Cart($this->context->cookie->id_cart);
 			}
-            $cartObj->updateQty($minimalQuantity, $idProduct, $idProductAttribute);
+            $cartObj->updateQty($minimalQuantity, $idProduct, $idProductAttribute, false, "set");
             //$this->messages[] = $this->module->l('The product', 'accountshoppinglistproduct').' "'.$product['title'].'" '.$this->module->l('was added to cart', 'accountshoppinglistproduct');
         }
     }
@@ -206,7 +206,8 @@ class ShoppingListAccountShoppingListProductModuleFrontController extends Module
 	 *		Redirectoin vers la confirtmation de commande
 	 */
     public function addAllToCart() {
-		$this->saveShoppingListToCookie(); 
+		$this->saveShoppingListToCookie();
+		$this->createCart();
         $idShoppingList = Tools::getValue('id_shopping_list');
         $shoppingListObj = ShoppingListObject::loadByIdAndCustomer($idShoppingList, $this->context->cookie->id_customer);
 		if ($shoppingListObj!=null)
@@ -215,8 +216,8 @@ class ShoppingListAccountShoppingListProductModuleFrontController extends Module
 			$products = $shoppingListObj->getAllProducts();
 			foreach($products as $product) {
 				// Pour Chaque produit (id) , récupération de la qte Saisie
-				$qte = Tools::getValue('qty_'.$product['id_product']);
-				if ($qte!='')
+				$qte = Tools::getValue('qty_'.$product['id_product'],'0');
+				if ($qte!='0')
 				{
 					$this->updateProductInCart($idShoppingList, $product['id_product'], $product['id_product_attribute'],$qte);
 				}
@@ -233,11 +234,11 @@ class ShoppingListAccountShoppingListProductModuleFrontController extends Module
 	**/
 	private function createCart()
 	{
-		if (is_null($this->context->cart)) {
+		//if (is_null($this->context->cart)) {
 
 			$this->context->cart = 
-				new Cart($this->context->cookie->id_cart);
-		}
+				new Cart();
+		//}
 
 		if (is_null($this->context->cart->id_lang)) {
 			 $this->context->cart->id_lang = $this->context->cookie->id_lang;
@@ -268,6 +269,8 @@ class ShoppingListAccountShoppingListProductModuleFrontController extends Module
 
 			 $this->context->cookie->__set('id_cart', $this->context->cart->id);
 		}
+		// Clean All Products
+		$this->context->cart->deleteAssociations();
 	}//createCart
 
     

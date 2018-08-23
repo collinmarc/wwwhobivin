@@ -98,13 +98,13 @@ class AdminCustomersControllerCore extends AdminController
             )
         );
 
-        if (Configuration::get('PS_B2B_ENABLE')) {
+     //   if (Configuration::get('PS_B2B_ENABLE')) {
             $this->fields_list = array_merge($this->fields_list, array(
                 'company' => array(
                     'title' => $this->l('Company')
                 ),
             ));
-        }
+       // }
 
         $this->fields_list = array_merge($this->fields_list, array(
             'total_spent' => array(

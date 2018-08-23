@@ -544,7 +544,8 @@ class CartCore extends ObjectModel
         $sql->where('p.`id_product` IS NOT NULL');
 
         // Build ORDER BY
-        $sql->orderBy('cp.`date_add`, cp.`id_product`, cp.`id_product_attribute` ASC');
+//        $sql->orderBy('cp.`date_add`, cp.`id_product`, cp.`id_product_attribute` ASC');
+        $sql->orderBy('p.reference ASC');
 
         if (Customization::isFeatureActive()) {
             $sql->select('cu.`id_customization`, cu.`quantity` AS customization_quantity');
@@ -1036,7 +1037,7 @@ class CartCore extends ObjectModel
                 }
             }
             /* Add product to the cart */
-            elseif ($operator == 'up') {
+            elseif ($operator == 'up' || $operator == 'set') {
                 $sql = 'SELECT stock.out_of_stock, IFNULL(stock.quantity, 0) as quantity
 						FROM '._DB_PREFIX_.'product p
 						'.Product::sqlStock('p', $id_product_attribute, true, $shop).'

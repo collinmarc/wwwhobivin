@@ -1,6 +1,10 @@
 # Hobivin.fr
 site internet www.hobivin.fr
 
+#V20180820
+#865: Annomalie en Saisie de Commande
+#866: Traitement des produits désactivés en précommande
+
 #V20180702
 #850: Le bouton "Accès au catalogue" d'un nouveau client le fonctionne pas
 
