@@ -95,26 +95,26 @@ class AdminCustomersControllerCore extends AdminController
             ),
             'email' => array(
                 'title' => $this->l('Email address')
-            )
+            ),
         );
 
-     //   if (Configuration::get('PS_B2B_ENABLE')) {
+        if (Configuration::get('PS_B2B_ENABLE')) {
             $this->fields_list = array_merge($this->fields_list, array(
                 'company' => array(
                     'title' => $this->l('Company')
                 ),
             ));
-       // }
+        }
 
         $this->fields_list = array_merge($this->fields_list, array(
-            'total_spent' => array(
+/*            'total_spent' => array(
                 'title' => $this->l('Sales'),
                 'type' => 'price',
                 'search' => false,
                 'havingFilter' => true,
                 'align' => 'text-right',
                 'badge_success' => true
-            ),
+            ),*/
             'active' => array(
                 'title' => $this->l('Enabled'),
                 'align' => 'text-center',
@@ -122,7 +122,7 @@ class AdminCustomersControllerCore extends AdminController
                 'type' => 'bool',
                 'orderby' => false,
                 'filter_key' => 'a!active'
-            ),
+            ),/*
             'newsletter' => array(
                 'title' => $this->l('Newsletter'),
                 'align' => 'text-center',
@@ -136,17 +136,16 @@ class AdminCustomersControllerCore extends AdminController
                 'type' => 'bool',
                 'callback' => 'printOptinIcon',
                 'orderby' => false
-            ),
+            ),*/
             'date_add' => array(
                 'title' => $this->l('Registration'),
                 'type' => 'date',
-                'align' => 'text-right'
+                'align' => 'text-center'
             ),
             'connect' => array(
                 'title' => $this->l('Last visit'),
-                'type' => 'datetime',
-                'search' => false,
-                'havingFilter' => true
+                'type' => 'date',
+                'align' => 'text-center'
             )
         ));
 
@@ -381,55 +380,6 @@ class AdminCustomersControllerCore extends AdminController
                     'col' => '4',
                     'hint' => $this->l('Invalid characters:').' 0-9!&lt;&gt;,;?=+()@#"°{}_$%:'
                 ),
-				array(
-					'type' => 'text',
-					'label' => $this->l('Address'),
-					'name' => 'address1',
-					'required' => true
-				),
-				array(
-					'type' => 'text',
-					'label' => $this->l('Address').'2',
-					'name' => 'address2'
-				),
-				array(
-					'type' => 'text',
-					'label' => $this->l('Code postal'),
-					'name' => 'postcode',
-					'required' => true
-				),
-				array(
-					'type' => 'text',
-					'label' => $this->l('Ville'),
-					'name' => 'city',
-					'required' => true
-				),
-				array(
-					'type' => 'select',
-					'label' => $this->l('Country'),
-					'name' => 'id_country',
-					'required' => true,
-					'default_value' => (int)$this->context->country->id,
-					'options' => array(
-						'query' => Country::getCountries($this->context->language->id),
-						'id' => 'id_country',
-						'name' => 'name'
-						)
-				),
-				array(
-                    'type' => 'text',
-                    'label' => $this->l('Telephone'),
-                    'name' => 'phone',
-                    'required' => Configuration::get('PS_ONE_PHONE_AT_LEAST'),
-                    'hint' => Configuration::get('PS_ONE_PHONE_AT_LEAST') ? sprintf($this->l('Vous devez enregister au moins un numéro de téléphone.')) : ''
-				),
-				array(
-					'type' => 'text',
-					'label' => $this->l('Portable'),
-					'name' => 'phone_mobile',
-					'required' =>  Configuration::get('PS_ONE_PHONE_AT_LEAST'),
-					'hint' => Configuration::get('PS_ONE_PHONE_AT_LEAST') ? sprintf($this->l('Vous devez enregister au moins un numéro de téléphone.')) : ''
-				),
                 array(
                     'type' => 'text',
                     'prefix' => '<i class="icon-envelope-o"></i>',
@@ -631,8 +581,12 @@ class AdminCustomersControllerCore extends AdminController
                     'name' => 'name'
                 ),
             );
-
-
+            $this->fields_form['input'][] = array(
+                'type' => 'text',
+                'label' => $this->l('Address'),
+                'name' => 'Adress1',
+				'required' => true
+            );
         }
 
         $this->fields_form['submit'] = array(
@@ -970,22 +924,12 @@ class AdminCustomersControllerCore extends AdminController
 
     public function processAdd()
     {
-	
-
         if (Tools::getValue('submitFormAjax')) {
             $this->redirect_after = false;
         }
         // Check that the new email is not already in use
         $customer_email = strval(Tools::getValue('email'));
         $customer = new Customer();
-
-		$customer->address1 = Tools::getValue('address1');
-		$customer->address2 = Tools::getValue('address2');
-		$customer->postcode = Tools::getValue('postcode');
-		$customer->city = Tools::getValue('city');
-		$customer->phone = Tools::getValue('phone');
-		$customer->phone_mobile = Tools::getValue('phone_mobile');
-
         if (Validate::isEmail($customer_email)) {
             $customer->getByEmail($customer_email);
         }
